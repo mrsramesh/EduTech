@@ -1,45 +1,48 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { Ionicons, MaterialIcons, FontAwesome5, AntDesign } from '@expo/vector-icons';
+import { View, Text } from 'react-native';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function Layout() {
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
+        tabBarActiveTintColor: '#007AFF',
+        tabBarInactiveTintColor: '#8e8e93',
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+        tabBarStyle: {
+          height: 60,
+          borderTopWidth: 1,
+          borderTopColor: '#ddd',
+          backgroundColor: '#fff',
+          elevation: 5,
+        },
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === 'home') {
+            return <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />;
+          } else if (route.name === 'mycourse') {
+            return <MaterialIcons name={focused ? 'menu-book' : 'menu-book'} size={24} color={color} />;
+          } else if (route.name === 'inbox') {
+            return <Ionicons name={focused ? 'mail' : 'mail-outline'} size={24} color={color} />;
+          } else if (route.name === 'transaction') {
+            return <FontAwesome5 name="money-bill-wave" size={22} color={color} />;
+          } else if (route.name === 'profile') {
+            return <AntDesign name={focused ? 'user' : 'user'} size={24} color={color} />;
+          }
+        },
+      })}
+    >
+      <Tabs.Screen name="home" options={{ title: 'Home' }} />
+      <Tabs.Screen name="mycourse" options={{ title: 'My Course' }} />
+      <Tabs.Screen name="inbox" options={{ title: 'Inbox' }} />
+      <Tabs.Screen name="transaction" options={{ title: 'Transaction' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
 }
