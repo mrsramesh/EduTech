@@ -1,14 +1,20 @@
 import { View, Text, StyleSheet ,Button } from 'react-native';
 import { useRouter } from 'expo-router';
+import AnimatedButton from '../../components/common/AnimatedButton';
 
 export default function Category() {
     const router = useRouter();
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>learning Anytime form intro 2  📚</Text>
-      <View style={styles.buttonGroup}>
-       <Button title="move to intro3" onPress={() => router.push('/intro3')} />
-       </View>
+      <Text style={styles.text}>learning Anytime ......   📚</Text>
+       <AnimatedButton 
+        text=""
+        minWidth={20}
+        height={50}
+        fontSize={14}
+        iconSize={18}
+        onPress={() => router.push('/intro3')}
+      />
     </View>
   );
 }
