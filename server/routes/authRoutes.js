@@ -15,6 +15,9 @@ const upload = require("../middleware/multer"); // Import the middleware
 const { getTeachers } = require("../controllers/getTeachers");
 const { getStudents } = require("../controllers/getStudents");
 const { getAllUsers } = require("../controllers/getalluser");
+const { textauthuser } = require("../controllers/textauthuser");
+
+
 
 const router = express.Router();
 
@@ -26,6 +29,8 @@ router.post("/profile", protect, updateProfile);
 router.get('/teachers', getTeachers);
 router.get('/students', getStudents);
 router.get('/alluser', getAllUsers);
+router.post('/test', textauthuser);
+
 
 
 

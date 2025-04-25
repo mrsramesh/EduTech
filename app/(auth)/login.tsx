@@ -1,7 +1,4 @@
-
-
-
- import { View, Text, TextInput, Button, StyleSheet, Pressable } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import API from '../utils/api';

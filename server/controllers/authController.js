@@ -140,155 +140,92 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// exports.registerUser = async (req, res) => {
-//   try {
-    
-//     const { fname, lname, email, password, role } = req.body;
-//     let profileImage = null;
 
-//       // First, verify req.body exists
-//       if (!req.body) {
-//         return res.status(400).json({
-//           success: false,
-//           message: "Request body is missing"
-//         });
-//       }
+// exports.registerUser = asyncHandler(async (req, res) => {
+//   const { fname, lname, email, password, role } = req.body;
 
-      
-//     console.log("Request body:", req.body); // Debug log
+//   // Debug: Log the email being checked
+//   console.log(`Checking for email: ${email}`);
 
+//   // Check if user exists (case-insensitive)
+//   const existingUser = await User.findOne({ email: email.toLowerCase() })
+//     .collation({ locale: 'en', strength: 2 }); // Case-insensitive search
 
-//     // Basic validation
-//     if (!fname || !lname || !email || !password || !role) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required"
-//       });
-//     }
-
-//     // Email format validation
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailRegex.test(email)) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid email format"
-//       });
-//     }
-
-//     // Password strength validation
-//     if (password.length < 8) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Password must be at least 8 characters long"
-//       });
-//     }
-
-//     // Check if user already exists
-//     const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-//     if (existingUser) {
-//       return res.status(409).json({
-//         success: false,
-//         message: "User already exists with this email"
-//       });
-//     }
-
-//     // Handle profile image upload if exists
-//     if (req.file) {
-//       const uploadResult = await uploadToCloudinary(req.file);
-//       profileImage = uploadResult.secure_url;
-//     }
-
-//     // Create new user
-//     const user = new User({
-//       fname: fname.trim(),
-//       lname: lname.trim(),
-//       email: email.toLowerCase().trim(),
-//       password,
-//       role: role.trim(),
-//       profileImage
-//     });
-
-//     // Save user (password will be hashed by pre-save hook)
-//     await user.save();
-
-//     // Generate JWT token
-//     const token = generateToken(user._id);
-
-//     // Return response without password
-//     const userObj = user.toObject();
-//     delete userObj.password;
-
-//     res.status(201).json({
-//       success: true,
-//       user: userObj,
-//       token
-//     });
-
-//   } catch (error) {
-//     console.error("Registration error:", error);
-    
-//     // Handle Mongoose validation errors
-//     if (error.name === "ValidationError") {
-//       const messages = Object.values(error.errors).map(val => val.message);
-//       return res.status(400).json({
-//         success: false,
-//         message: "Validation error",
-//         errors: messages
-//       });
-//     }
-
-//     res.status(500).json({
+//   if (existingUser) {
+//     console.log(`Found existing user: ${existingUser.email}`);
+//     return res.status(409).json({
 //       success: false,
-//       message: "Internal server error",
-//       error: process.env.NODE_ENV === "development" ? error.message : undefined
+//       existingEmail: existingUser.email, // Return the actual stored email
+//       message: 'Email already registered'
 //     });
 //   }
-// };
 
+//   // Debug: Before creating new user
+//   console.log(`Creating new user with email: ${email.toLowerCase()}`);
+
+//   // Create user
+//   const user = await User.create({
+//     fname,
+//     lname,
+//     email: email.toLowerCase(), // Force lowercase
+//     password,
+//     role,
+//     profileImage: req.file ? `/uploads/${req.file.filename}` : null
+//   });
+
+//   // Debug: After creation
+//   console.log(`Created user:`, user);
+
+//   res.status(201).json({
+//     success: true,
+//     user: {
+//       id: user._id,
+//       email: user.email,
+//       // ... other fields
+//     }
+//   });
+// });
+//change the code password bcypt ke krad taki login ho sake 
+
+// Register a new user 
 exports.registerUser = asyncHandler(async (req, res) => {
   const { fname, lname, email, password, role } = req.body;
 
-  // Debug: Log the email being checked
-  console.log(`Checking for email: ${email}`);
-
-  // Check if user exists (case-insensitive)
-  const existingUser = await User.findOne({ email: email.toLowerCase() })
-    .collation({ locale: 'en', strength: 2 }); // Case-insensitive search
-
-  if (existingUser) {
-    console.log(`Found existing user: ${existingUser.email}`);
-    return res.status(409).json({
-      success: false,
-      existingEmail: existingUser.email, // Return the actual stored email
-      message: 'Email already registered'
-    });
-  }
-
-  // Debug: Before creating new user
-  console.log(`Creating new user with email: ${email.toLowerCase()}`);
-
-  // Create user
-  const user = await User.create({
-    fname,
-    lname,
-    email: email.toLowerCase(), // Force lowercase
-    password,
-    role,
-    profileImage: req.file ? `/uploads/${req.file.filename}` : null
-  });
-
-  // Debug: After creation
-  console.log(`Created user:`, user);
-
-  res.status(201).json({
-    success: true,
-    user: {
-      id: user._id,
-      email: user.email,
-      // ... other fields
+  try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email already registered" });
     }
-  });
+
+    // Hash the password before saving the user
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the new user with hashed password
+    const user = new User({
+      fname,
+      lname,
+      email: email.toLowerCase(),
+      password: hashedPassword,  // Save hashed password
+      role
+    });
+
+    // Save user to the database
+    await user.save();
+
+    return res.status(201).json({
+      message: "User registered successfully",
+      user: { fname: user.fname, email: user.email }
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
 });
+
+
+
+
+
 
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
