@@ -36,7 +36,7 @@ export default function MentorListScreen() {
   const fetchMentors = async () => {
     try {
       setLoading(true);
-      const response = await API.get('/api/auth/teachers', { params: { role: 'teacher' } });
+      const response = await API.get('/api/auth/students', { params: { role: 'student' } });
       setMentors(response.data);
     } catch (error) {
       Toast.show({

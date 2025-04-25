@@ -1,207 +1,15 @@
-// import { useState, useEffect } from 'react';
-// import { 
-//   View, 
-//   Text, 
-//   StyleSheet, 
-//   FlatList, 
-//   TouchableOpacity, 
-//   ActivityIndicator,
-//   Image,
-//   ImageSourcePropType
-// } from 'react-native';
-// import { useRouter } from 'expo-router';
-// import API from '../utils/api';
-// import Toast from 'react-native-toast-message';
-
-// type User = {
-//   _id: string;
-//   fname: string;
-//   lname: string;
-//   email: string;
-//   role: string;
-//   profileImage?: string;
-//   createdAt: string;
-// };
-
-// export default function UserListScreen() {
-//   const [users, setUsers] = useState<User[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [selectedRole, setSelectedRole] = useState<string | null>(null);
-//   const router = useRouter();
-
-//   const fetchUsers = async (role?: string) => {
-//     try {
-//       setLoading(true);
-//       const params = role ? { role } : {};
-//       const response = await API.get('/users', { params });
-//       setUsers(response.data);
-//     } catch (error) {
-//       console.error('Error fetching users:', error);
-//       Toast.show({
-//         type: 'error',
-//         text1: 'Error',
-//         text2: 'Failed to fetch users',
-//       });
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchUsers(selectedRole || undefined);
-//   }, [selectedRole]);
-
-//   const renderUserItem = ({ item }: { item: User }) => {
-//     const imageSource: ImageSourcePropType = item.profileImage 
-//       ? { uri: item.profileImage } 
-//       : require('../../assets/images/icon.png'); // Add a default image
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>User Management</Text>
-      
-//       {/* Role Filter */}
-//       <View style={styles.filterContainer}>
-//         <Text style={styles.filterLabel}>Filter by Role:</Text>
-//         <View style={styles.roleButtons}>
-//           <TouchableOpacity
-//             style={[styles.roleButton, !selectedRole && styles.activeRoleButton]}
-//             onPress={() => setSelectedRole(null)}
-//           >
-//             <Text style={!selectedRole ? styles.activeRoleText : styles.roleText}>All</Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity
-//             style={[styles.roleButton, selectedRole === 'student' && styles.activeRoleButton]}
-//             onPress={() => setSelectedRole('student')}
-//           >
-//             <Text style={selectedRole === 'student' ? styles.activeRoleText : styles.roleText}>Students</Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity
-//             style={[styles.roleButton, selectedRole === 'teacher' && styles.activeRoleButton]}
-//             onPress={() => setSelectedRole('teacher')}
-//           >
-//             <Text style={selectedRole === 'teacher' ? styles.activeRoleText : styles.roleText}>Teachers</Text>
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-
-//       {/* User List */}
-//       {loading ? (
-//         <ActivityIndicator size="large" style={styles.loader} />
-//       ) : users.length === 0 ? (
-//         <Text style={styles.noUsersText}>No users found</Text>
-//       ) : (
-//         <FlatList
-//           data={users}
-//           renderItem={renderUserItem}
-//           keyExtractor={(item) => item._id}
-//           contentContainerStyle={styles.listContent}
-//         />
-//       )}
-//     </View>
-//   );
-//   }}
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: '#f5f5f5',
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     marginBottom: 20,
-//     color: '#333',
-//   },
-//   filterContainer: {
-//     marginBottom: 20,
-//   },
-//   filterLabel: {
-//     fontSize: 16,
-//     marginBottom: 8,
-//     color: '#555',
-//   },
-//   roleButtons: {
-//     flexDirection: 'row',
-//     gap: 10,
-//   },
-//   roleButton: {
-//     paddingHorizontal: 16,
-//     paddingVertical: 8,
-//     borderRadius: 20,
-//     backgroundColor: '#e0e0e0',
-//   },
-//   activeRoleButton: {
-//     backgroundColor: '#007AFF',
-//   },
-//   roleText: {
-//     color: '#333',
-//   },
-//   activeRoleText: {
-//     color: '#fff',
-//   },
-//   listContent: {
-//     paddingBottom: 20,
-//   },
-//   userCard: {
-//     backgroundColor: '#fff',
-//     borderRadius: 8,
-//     padding: 16,
-//     marginBottom: 12,
-//     elevation: 2,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 1 },
-//     shadowOpacity: 0.2,
-//     shadowRadius: 2,
-//   },
-//   userInfo: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     gap: 12,
-//   },
-//   avatar: {
-//     width: 50,
-//     height: 50,
-//     borderRadius: 25,
-//   },
-//   userName: {
-//     fontSize: 16,
-//     fontWeight: '600',
-//     color: '#333',
-//   },
-//   userEmail: {
-//     fontSize: 14,
-//     color: '#666',
-//   },
-//   userRole: {
-//     fontSize: 12,
-//     color: '#007AFF',
-//     marginTop: 4,
-//   },
-//   loader: {
-//     marginTop: 40,
-//   },
-//   noUsersText: {
-//     textAlign: 'center',
-//     marginTop: 20,
-//     color: '#666',
-//   },
-// });
-
-
 import { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
   ActivityIndicator,
   Image,
   TextInput,
   RefreshControl,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import API from '../utils/api';
@@ -228,17 +36,22 @@ export default function UserListScreen() {
   const router = useRouter();
   const { mentorId } = useLocalSearchParams();
 
+  // Function to fetch users based on the selected role
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const params: { role?: string } = {};
-      
-      if (selectedRole !== 'all') {
-        params.role = selectedRole;
+      let apiUrl = ''; 
+
+      if (selectedRole === 'all') {
+        apiUrl = '/api/auth/alluser'; // All users (students + teachers)
+      } else if (selectedRole === 'student') {
+        apiUrl = '/api/auth/students'; // Only students
+      } else if (selectedRole === 'teacher') {
+        apiUrl = '/api/auth/teachers'; // Only teachers
       }
-      
-      const response = await API.get('/users', { params });
-      setUsers(response.data);
+
+      const response = await API.get(apiUrl); // Fetch data based on the role
+      setUsers(response.data); // Set users data based on response
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -258,23 +71,24 @@ export default function UserListScreen() {
 
   useEffect(() => {
     fetchUsers();
-  }, [selectedRole]);
+  }, [selectedRole]); // Fetch users when role changes
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = `${user.fname} ${user.lname}`.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      `${user.fname} ${user.lname}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
   const renderUserItem = ({ item }: { item: User }) => {
-    const imageSource = item.profileImage 
-      ? { uri: item.profileImage } 
-      : require('../../assets/images/icon.png');
+    const imageSource = item.profileImage
+      ? { uri: item.profileImage }
+      : require('../../assets/images/icon.png'); // Default image
 
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.userCard}
-        onPress={() => router.push(`/userdetail`)} // by unique ide
+        onPress={() => router.push(`/userdetail`)} // by unique id
         activeOpacity={0.7}
       >
         <Image source={imageSource} style={styles.avatar} />
@@ -288,10 +102,9 @@ export default function UserListScreen() {
             )}
           </View>
           <Text style={styles.userEmail} numberOfLines={1}>{item.email}</Text>
-          <View style={[
-            styles.roleBadge,
-            item.role === 'teacher' ? styles.teacherBadge : styles.studentBadge
-          ]}>
+          <View
+            style={[styles.roleBadge, item.role === 'teacher' ? styles.teacherBadge : styles.studentBadge]}
+          >
             <Text style={styles.roleText}>
               {item.role === 'teacher' ? 'Educator' : 'Student'}
             </Text>
@@ -303,17 +116,15 @@ export default function UserListScreen() {
   };
 
   return (
-    <LinearGradient 
-      colors={['#ffffff', '#f8fafc']} 
+    <LinearGradient
+      colors={['#ffffff', '#f8fafc']}
       style={styles.container}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
       <View style={styles.header}>
         <Text style={styles.title}>User Management</Text>
-        {mentorId && (
-          <Text style={styles.subtitle}>Students under mentor</Text>
-        )}
+        {mentorId && <Text style={styles.subtitle}>Students under mentor</Text>}
       </View>
 
       {/* Search Bar */}
@@ -330,8 +141,8 @@ export default function UserListScreen() {
       </View>
 
       {/* Role Filter */}
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.roleFilterContainer}
       >
@@ -340,14 +151,16 @@ export default function UserListScreen() {
             key={role}
             style={[
               styles.roleFilterButton,
-              selectedRole === role && styles.activeRoleFilterButton
+              selectedRole === role && styles.activeRoleFilterButton,
             ]}
             onPress={() => setSelectedRole(role as 'all' | 'student' | 'teacher')}
           >
-            <Text style={[
-              styles.roleFilterText,
-              selectedRole === role && styles.activeRoleFilterText
-            ]}>
+            <Text
+              style={[
+                styles.roleFilterText,
+                selectedRole === role && styles.activeRoleFilterText,
+              ]}
+            >
               {role === 'all' ? 'All Users' : role === 'teacher' ? 'Educators' : 'Students'}
             </Text>
           </TouchableOpacity>
@@ -366,10 +179,7 @@ export default function UserListScreen() {
           <Text style={styles.emptyStateText}>
             {searchQuery ? 'No matching users found' : 'No users available'}
           </Text>
-          <TouchableOpacity 
-            style={styles.refreshButton}
-            onPress={onRefresh}
-          >
+          <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
             <Feather name="refresh-cw" size={16} color="#4f46e5" />
             <Text style={styles.refreshButtonText}>Refresh</Text>
           </TouchableOpacity>
@@ -444,54 +254,43 @@ const styles = StyleSheet.create({
   },
   roleFilterContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 16,
+    marginBottom: 16,
   },
   roleFilterButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#f1f5f9',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    backgroundColor: '#e2e8f0',
     marginRight: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   activeRoleFilterButton: {
     backgroundColor: '#4f46e5',
-    borderColor: '#4f46e5',
   },
   roleFilterText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-    fontFamily: 'Inter_600SemiBold',
+    color: '#1e293b',
+    fontFamily: 'Inter_400Regular',
   },
   activeRoleFilterText: {
-    color: '#ffffff',
-  },
-  listContent: {
-    paddingHorizontal: 24,
+    color: '#fff',
   },
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
     padding: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.2,
     shadowRadius: 3,
-    elevation: 1,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 50,
+    height: 50,
+    borderRadius: 50,
     marginRight: 16,
-    backgroundColor: '#f1f5f9',
   },
   userInfo: {
     flex: 1,
@@ -504,36 +303,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#1e293b',
-    marginBottom: 4,
     fontFamily: 'Inter_600SemiBold',
-    maxWidth: '80%',
+    maxWidth: '75%',
   },
   verifiedIcon: {
-    marginLeft: 6,
+    marginLeft: 8,
   },
   userEmail: {
     fontSize: 14,
     color: '#64748b',
-    marginBottom: 6,
     fontFamily: 'Inter_400Regular',
+    marginTop: 4,
   },
   roleBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginTop: 8,
+    alignSelf: 'flex-start',
   },
   teacherBadge: {
-    backgroundColor: '#e0f2fe',
+    backgroundColor: '#f3f4f6',
   },
   studentBadge: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#e2e8f0',
   },
   roleText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#0c4a6e',
-    fontFamily: 'Inter_600SemiBold',
+    color: '#1e293b',
+    fontFamily: 'Inter_400Regular',
   },
   loadingContainer: {
     flex: 1,
@@ -541,39 +339,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 16,
-    color: '#64748b',
-    fontFamily: 'Inter_400Regular',
+    fontSize: 18,
+    color: '#4f46e5',
+    marginTop: 8,
+    fontFamily: 'Inter_600SemiBold',
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
   },
   emptyStateText: {
-    fontSize: 16,
-    color: '#94a3b8',
-    marginTop: 16,
-    textAlign: 'center',
+    fontSize: 18,
+    color: '#64748b',
+    marginTop: 12,
     fontFamily: 'Inter_400Regular',
   },
   refreshButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 16,
-    padding: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: '#eef2ff',
   },
   refreshButtonText: {
     marginLeft: 8,
     color: '#4f46e5',
-    fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
   },
+  listContent: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
   listFooter: {
-    height: 40,
+    height: 80,
   },
 });
