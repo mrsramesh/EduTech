@@ -27,7 +27,7 @@ const allCourses = {
   All: [
     { id: '1', title: 'Intro to React', duration: '30m' },
     { id: '2', title: 'JSX Deep Dive', duration: '45m' },
-    { id: '3', title: 'Hooks 101', duration: '1h 15m' },
+    // { id: '3', title: 'Hooks 101', duration: '1h 15m' },
   ],
   'Graphic Design': [
     { id: '4', title: 'Photoshop Basics', duration: '40m' },
@@ -109,7 +109,7 @@ const HomeScreen = () => {
       />
 
       <View style={{ flex: 1 }}>
-        <CourseCardPanel />
+        {/* <CourseCardPanel /> */}
         <CourseSection
           section={{ courses: allCourses[selectedCategory as keyof typeof allCourses] || [] }}
 
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 80,
   },
   sectionTitle: {
     fontSize: 18,
@@ -256,10 +256,17 @@ const styles = StyleSheet.create({
     color: '#0961F5',
   },
   filterChips: {
+    // flexDirection: 'row',
+    // gap: 20,
+    // marginTop: 20,
     flexDirection: 'row',
-    gap: 10,
+    flexWrap: 'wrap', // allows wrapping on smaller screens
+    justifyContent: 'space-between', // distributes spacing automatically
+    alignItems: 'center',
     marginTop: 20,
-  },
+    paddingHorizontal: 10,
+    gap: 0, // not supported, will handle with margins  
+    },
   chip: {
     backgroundColor: '#E8F1FF',
     borderRadius: 15,

@@ -11,10 +11,11 @@
 const express = require("express");
 const { registerUser, loginUser, updateProfile } = require("../controllers/authController");
 const protect = require("../middleware/authMiddleware");
+const upload = require("../middleware/multer"); // Import the middleware
 
 const router = express.Router();
 
-router.post("/register", registerUser);
+router.post("/register", upload.single('profileImage'), registerUser);
 router.post("/login", loginUser);
 router.post("/profile", protect, updateProfile);
 

@@ -1,44 +1,52 @@
 import { View, Text, TextInput, Button, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import API from '../utils/api';
 import { AUTH_URL } from '../constants/urls';
 import Toast from 'react-native-toast-message';
+import { AuthRoutes } from '../constants/routes';
 
-export default function ForgotPassword() {
-  const [email, setEmail] = useState('');
+export default function VerifyOTP() {
+  const { email } = useLocalSearchParams();
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleResetRequest = async () => {
-    if (!email) {
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
       Toast.show({
         type: 'error',
-        text1: 'Email required',
-        text2: 'Please enter your email address'
+        text1: 'Invalid OTP',
+        text2: 'Please enter the 6-digit OTP'
       });
       return;
     }
 
     setLoading(true);
     try {
-      const response = await API.post(AUTH_URL.FORGOT_PASSWORD, { email });
+      const response = await API.post(AUTH_URL.VERIFY_OTP, { 
+        email: Array.isArray(email) ? email[0] : email, 
+        otp 
+      });
       
       if (response.data.success) {
         Toast.show({
           type: 'success',
-          text1: 'OTP Sent',
-          text2: 'Check your email for the OTP'
+          text1: 'OTP Verified',
+          text2: 'You can now reset your password'
         });
         router.push({
-          pathname: '/(auth)/verifyotp' as never,
-          params: { email }
+          pathname: '/(auth)/resetpassword' as never,
+          params: { 
+            email: Array.isArray(email) ? email[0] : email,
+            resetToken: response.data.resetToken
+          }
         });
       }
     } catch (error: any) {
-      console.error('Forgot password error:', error);
+      console.error('OTP verification error:', error);
       
-      let errorMessage = 'Failed to send OTP';
+      let errorMessage = 'Failed to verify OTP';
       if (error.response) {
         errorMessage = error.response.data?.message || `Error (${error.response.status})`;
       }
@@ -55,30 +63,30 @@ export default function ForgotPassword() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Forgot Password</Text>
-      <Text style={styles.subtitle}>Enter your email to receive a password reset OTP</Text>
+      <Text style={styles.heading}>Verify OTP</Text>
+      <Text style={styles.subtitle}>Enter the 6-digit OTP sent to {email}</Text>
       
       <TextInput
         style={styles.input}
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
+        placeholder="Enter OTP"
+        value={otp}
+        onChangeText={setOtp}
+        keyboardType="number-pad"
+        maxLength={6}
       />
 
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <Button 
-          title="Send OTP" 
-          onPress={handleResetRequest} 
+          title="Verify OTP" 
+          onPress={handleVerifyOTP} 
           disabled={loading}
         />
       )}
 
-      <Pressable onPress={() => router.push('/(auth)/login')} style={styles.linkContainer}>
-        <Text style={styles.link}>Back to Login</Text>
+      <Pressable onPress={() => router.push('/(auth)/forgot')} style={styles.linkContainer}>
+        <Text style={styles.link}>Resend OTP</Text>
       </Pressable>
     </View>
   );
@@ -94,7 +102,9 @@ const styles = StyleSheet.create({
     borderRadius: 8, 
     marginBottom: 20, 
     padding: 12,
-    fontSize: 16
+    fontSize: 16,
+    textAlign: 'center',
+    letterSpacing: 8
   },
   linkContainer: { marginTop: 20, alignItems: 'center' },
   link: { color: 'blue', fontSize: 16 },

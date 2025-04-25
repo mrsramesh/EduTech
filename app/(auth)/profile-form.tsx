@@ -1,35 +1,3 @@
-// import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-// import { useState } from 'react';
-
-// export default function ForgotPassword() {
-//   const [email, setEmail] = useState('');
-
-//   const handleReset = () => {
-//     console.log("Reset link sent to:", email);
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.heading}>Forgot Password</Text>
-
-//       <TextInput
-//         style={styles.input}
-//         placeholder="Enter your email"
-//         value={email}
-//         onChangeText={setEmail}
-//       />
-
-//       <Button title="Reset Password" onPress={handleReset} />
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, padding: 20, justifyContent: 'center' },
-//   heading: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-//   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, marginBottom: 16, padding: 12 }
-// });
-
 
 import { View, Text, TextInput, Button, ScrollView, StyleSheet } from 'react-native';
 import { useState } from 'react';
@@ -55,7 +23,7 @@ export default function ProfileForm() {
   const handleSubmit = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      await API.post(AUTH_URL.PROFILE, form, {
+      await API.post(AUTH_URL.UPDATE_PROFILE, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       Toast.show({ type: 'success', text1: 'Profile updated' });

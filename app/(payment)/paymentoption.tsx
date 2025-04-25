@@ -5,13 +5,19 @@ const PaymentOption = () => {
     const goToHome = () => {
         router.push('/addnewcard'); // Navigates to Home tab
       };
+      const goTopayment = () => {
+        router.push('/payment'); // Navigates to Home tab
+      };
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Payment Option</Text>
       <Text style={styles.text}>💳 Choose or add your preferred payment method.</Text>
       <Text style={styles.text}>🔒 All transactions are secure and encrypted.</Text>
       <View style={styles.buttonContainer}>
-        <Button title="Go to Home" onPress={goToHome} />
+        <Button title="make payment " onPress={goTopayment} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="add a new Card " onPress={goToHome} />
       </View>
     </SafeAreaView>
   );

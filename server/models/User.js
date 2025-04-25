@@ -163,67 +163,99 @@
 
 
 
+// const mongoose = require("mongoose");
+// const bcrypt = require("bcryptjs");
 
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+// const userSchema = new mongoose.Schema({
+//   fname: { 
+//     type: String, 
+//     required: [true, "First name is required"],
+//     trim: true
+//   },
+//   lname: { 
+//     type: String, 
+//     required: [true, "Last name is required"],
+//     trim: true
+//   },
+//   email: { 
+//     type: String, 
+//     required: [true, "Email is required"], 
+//     unique: true,
+//     trim: true,
+//     lowercase: true,
+//     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Please fill a valid email address"]
+//   },
+//   password: { 
+//     type: String, 
+//     required: [true, "Password is required"],
+//     minlength: [8, "Password must be at least 8 characters"]
+//   },
+//   role: {
+//     type: String,
+//     required: [true, "Role is required"],
+//     enum: ["student", "teacher", "admin"],
+//     default: "student"
+//   },
+//   profileImage: {
+//     type: String,
+//     default: null
+//   }
+// }, { 
+//   timestamps: true,
+//   toJSON: {
+//     transform: function(doc, ret) {
+//       delete ret.password;
+//       delete ret.__v;
+//       return ret;
+//     }
+//   }
+// });
+
+// // Hash password before saving
+// userSchema.pre("save", async function(next) {
+//   if (!this.isModified("password")) return next();
+  
+//   try {
+//     const salt = await bcrypt.genSalt(10);
+//     this.password = await bcrypt.hash(this.password, salt);
+//     next();
+//   } catch (err) {
+//     next(err);
+//   }
+// });
+
+// // Method to compare passwords
+// userSchema.methods.comparePassword = async function(candidatePassword) {
+//   return await bcrypt.compare(candidatePassword, this.password);
+// };
+
+// module.exports = mongoose.model("User", userSchema);
+
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  fname: { 
-    type: String, 
-    required: [true, "First name is required"],
-    trim: true
-  },
-  lname: { 
-    type: String, 
-    required: [true, "Last name is required"],
-    trim: true
-  },
+  fname: { type: String, required: true },
+  lname: { type: String, required: true },
   email: { 
     type: String, 
-    required: [true, "Email is required"], 
+    required: true, 
     unique: true,
-    trim: true,
     lowercase: true,
-    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Please fill a valid email address"]
+    trim: true,
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email']
   },
-  password: { 
-    type: String, 
-    required: [true, "Password is required"],
-    minlength: [6, "Password must be at least 6 characters"]
-  },
-  role: {
-    type: String,
-    required: [true, "Role is required"],
-    enum: ["student", "teacher", "admin"],
-    default: "student"
-  }
-}, { 
+  password: { type: String, required: true },
+  role: { type: String, enum: ['student', 'teacher'], default: 'student' },
+  profileImage: { type: String }
+}, {
   timestamps: true,
-  toJSON: {
-    transform: function(doc, ret) {
-      delete ret.password;
-      delete ret.__v;
-      return ret;
-    }
-  }
+  collation: { locale: 'en', strength: 2 } // Case-insensitive collation
 });
 
-// Hash password before saving
-userSchema.pre("save", async function(next) {
-  if (!this.isModified("password")) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
+// Add pre-save hook to ensure lowercase email
+userSchema.pre('save', function(next) {
+  this.email = this.email.toLowerCase();
+  next();
 });
 
-// Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);
