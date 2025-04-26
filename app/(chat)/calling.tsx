@@ -16,7 +16,7 @@
 
 
 // import React, { useEffect, useRef, useState } from 'react';
-// import { View } from 'react-native';
+import { View , Text } from 'react-native';
 // import {
 //   RTCPeerConnection as RTCPC,
 //   RTCView,
@@ -112,3 +112,8 @@
 // };
 
 // export default VideoCall;
+
+export default function CallingScreen() {
+    return <View><Text>Calling</Text></View>;
+  }
+  

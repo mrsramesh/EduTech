@@ -1,5 +1,301 @@
-// Updated HomeScreen.js with carousel-like filter chips and dynamic card filtering
-import React, { useState } from 'react';
+// // Updated HomeScreen.js with carousel-like filter chips and dynamic card filtering
+// import React, { useState } from 'react';
+// import {
+//   View,
+//   Text,
+//   StyleSheet,
+//   ScrollView,
+//   TouchableOpacity,
+//   SafeAreaView,
+//   FlatList
+// } from 'react-native';
+// import SearchComponent from '../../components/common/SearchWithFilter';
+// import CourseCardPanel from '@/components/CourseCard1';
+// import CourseSection from '@/components/CourseSection';
+// import { useRouter } from 'expo-router';
+// import MentorCard from '@/components/mentor/MentorCard';
+
+// const mentors = [
+//   { name: 'Alice', image: require('../../assets/images/mentors/alice.png') },
+//   { name: 'Bob', image: require('../../assets/images/mentors/alice.png') },
+//   { name: 'Charlie', image: require('../../assets/images/mentors/alice.png') },
+//   { name: 'Daisy', image: require('../../assets/images/mentors/alice.png') },
+//   { name: 'Ethan', image: require('../../assets/images/mentors/alice.png') },
+// ];
+
+// const allCourses = {
+//   All: [
+//     { id: '1', title: 'Intro to React', duration: '30m' },
+//     { id: '2', title: 'JSX Deep Dive', duration: '45m' },
+//     // { id: '3', title: 'Hooks 101', duration: '1h 15m' },
+//   ],
+//   'Graphic Design': [
+//     { id: '4', title: 'Photoshop Basics', duration: '40m' },
+//     { id: '5', title: 'Logo Design', duration: '1h' },
+//   ],
+//   'UI/UX': [
+//     { id: '6', title: 'User Journey Mapping', duration: '30m' },
+//     { id: '7', title: 'Figma Crash Course', duration: '50m' },
+//   ],
+// };
+
+
+// const filterOptions = ['All', 'Graphic Design', 'UI/UX'];
+
+// const HomeScreen = () => {
+//   const router = useRouter();
+//   const [selectedCategory, setSelectedCategory] = useState('All');
+
+//   return (
+//     <ScrollView style={styles.container}>
+//       <View style={styles.greetingContainer}>
+//         <View>
+//           <Text style={styles.helloText}>Hi, Ronald A. Martin</Text>
+//           <Text style={styles.subText}>What would you like to learn today? Search Below.</Text>
+//         </View>
+//         <View style={styles.avatar} />
+//       </View>
+
+//       <SafeAreaView style={{ flex: 1 }}>
+//         <SearchComponent />
+//       </SafeAreaView>
+
+//       <View style={styles.specialBox}>
+//         <Text style={styles.specialOffer}>25% Off*</Text>
+//         <Text style={styles.specialTitle}>Today’s Special</Text>
+//         <Text style={styles.specialDesc}>
+//           Get a Discount for Every Course Order only Valid for Today.!
+//         </Text>
+//       </View>
+
+//       <View style={styles.section}>
+//         <Text style={styles.sectionTitle}>Categories</Text>
+//         <Text style={styles.sectionSeeAll}>See All ➤</Text>
+//       </View>
+
+//       <View style={styles.categories}>
+//         <Text style={styles.category}>3D Design</Text>
+//         <Text style={[styles.category, styles.activeCategory]}>Arts & Humanities</Text>
+//         <Text style={styles.category}>Graphic Design</Text>
+//       </View>
+
+//       <View style={styles.section}>
+//         <Text style={styles.sectionTitle}>Popular Course </Text>
+//         <TouchableOpacity onPress={() => router.push('/popular')}>
+//           <Text style={styles.sectionSeeAll}>See All ➤</Text>
+//         </TouchableOpacity>
+//       </View>
+
+//       <View style={styles.mentorRow}>
+//         {mentors.map((mentor, index) => (
+//           <MentorCard key={index} name={mentor.name} image={mentor.image} />
+//         ))}
+//       </View>
+
+//       <FlatList
+//         data={filterOptions}
+//         keyExtractor={(item) => item}
+//         horizontal
+//         contentContainerStyle={styles.filterChips}
+//         showsHorizontalScrollIndicator={false}
+//         renderItem={({ item }) => (
+//           <TouchableOpacity
+//             style={[styles.chip, selectedCategory === item && styles.activeChip]}
+//             onPress={() => setSelectedCategory(item)}
+//           >
+//             <Text style={[styles.chipText, selectedCategory === item && styles.activeChipText]}>{item}</Text>
+//           </TouchableOpacity>
+//         )}
+//       />
+
+//       <View style={{ flex: 1 }}>
+//         {/* <CourseCardPanel /> */}
+//         <CourseSection
+//           section={{ courses: allCourses[selectedCategory as keyof typeof allCourses] || [] }}
+
+//           type="ongoing"
+//           onVideoPress={(video:any) => {
+//             console.log('Video pressed:', video);
+//           }}
+//         />
+//       </View>
+
+//       <View style={styles.section}>
+//         <Text style={styles.sectionTitle}>Top Mentors</Text>
+//         <TouchableOpacity onPress={() => router.push('/(menter)/menterlist')}>
+//           <Text style={styles.sectionSeeAll}>See All ➤</Text>
+//         </TouchableOpacity>
+//       </View>
+
+//       <View style={styles.mentorRow}>
+//         {mentors.map((mentor, index) => (
+//           <MentorCard key={index} name={mentor.name} image={mentor.image} />
+//         ))}
+//       </View>
+//     </ScrollView>
+//   );
+// };
+
+
+
+// export default HomeScreen;
+
+// const styles = StyleSheet.create({
+//   container: {
+//     backgroundColor: '#F5F9FF',
+//     flex: 1,
+//     padding: 20,
+//   },
+//   greetingContainer: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginTop: 30,
+//   },
+//   helloText: {
+//     fontSize: 24,
+//     fontWeight: '600',
+//     color: '#202244',
+//   },
+//   subText: {
+//     fontSize: 13,
+//     fontWeight: '700',
+//     color: 'rgba(84,84,84,0.8)',
+//     marginTop: 5,
+//     maxWidth: 250,
+//   },
+//   avatar: {
+//     width: 40,
+//     height: 40,
+//     borderRadius: 20,
+//     borderColor: '#167F71',
+//     borderWidth: 2,
+//   },
+//   searchBox: {
+//     backgroundColor: 'white',
+//     marginTop: 30,
+//     borderRadius: 15,
+//     height: 64,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     paddingHorizontal: 15,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.1,
+//     shadowRadius: 5,
+//     elevation: 5,
+//   },
+//   searchIcon: {
+//     fontSize: 20,
+//     marginRight: 10,
+//   },
+//   input: {
+//     flex: 1,
+//     fontSize: 16,
+//     fontWeight: '700',
+//     color: '#202244',
+//   },
+//   searchBtn: {
+//     width: 38,
+//     height: 38,
+//     borderRadius: 10,
+//     backgroundColor: '#0961F5',
+//   },
+//   specialBox: {
+//     backgroundColor: '#0961F5',
+//     borderRadius: 22,
+//     padding: 20,
+//     marginTop: 30,
+//   },
+//   specialOffer: {
+//     color: 'white',
+//     fontSize: 15,
+//     fontWeight: '800',
+//     textTransform: 'uppercase',
+//   },
+//   specialTitle: {
+//     color: 'white',
+//     fontSize: 22,
+//     fontWeight: '800',
+//     marginTop: 5,
+//   },
+//   specialDesc: {
+//     color: 'white',
+//     fontSize: 13,
+//     fontWeight: '800',
+//     marginTop: 10,
+//     maxWidth: 250,
+//   },
+//   section: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginTop: 80,
+//   },
+//   sectionTitle: {
+//     fontSize: 18,
+//     fontWeight: '600',
+//     color: '#202244',
+//   },
+//   sectionSeeAll: {
+//     fontSize: 12,
+//     fontWeight: '800',
+//     color: '#0961F5',
+//     textTransform: 'uppercase',
+//   },
+//   categories: {
+//     flexDirection: 'row',
+//     gap: 20,
+//     marginTop: 10,
+//   },
+//   category: {
+//     fontSize: 15,
+//     fontWeight: '700',
+//     color: '#A0A4AB',
+//   },
+//   activeCategory: {
+//     color: '#0961F5',
+//   },
+//   filterChips: {
+//     // flexDirection: 'row',
+//     // gap: 20,
+//     // marginTop: 20,
+//     flexDirection: 'row',
+//     flexWrap: 'wrap', // allows wrapping on smaller screens
+//     justifyContent: 'space-between', // distributes spacing automatically
+//     alignItems: 'center',
+//     marginTop: 20,
+//     paddingHorizontal: 10,
+//     gap: 0, // not supported, will handle with margins  
+//     },
+//   chip: {
+//     backgroundColor: '#E8F1FF',
+//     borderRadius: 15,
+//     paddingVertical: 5,
+//     paddingHorizontal: 15,
+//   },
+//   chipText: {
+//     fontSize: 13,
+//     fontWeight: '700',
+//     color: '#202244',
+//   },
+//   activeChip: {
+//     backgroundColor: '#167F71',
+//   },
+//   activeChipText: {
+//     color: 'white',
+//   },
+//   mentorRow: {
+//     flexDirection: 'row',
+//     flexWrap: 'wrap',
+//   },
+// });
+
+// hard coded data 
+
+
+// HomeScreen.tsx
+
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,27 +303,38 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  FlatList
+  FlatList,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
-import SearchComponent from '../../components/common/SearchWithFilter';
-import CourseCardPanel from '@/components/CourseCard1';
-import CourseSection from '@/components/CourseSection';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
+
+import SearchComponent from '@/components/common/SearchWithFilter';
+import CourseSection from '@/components/CourseSection';
 import MentorCard from '@/components/mentor/MentorCard';
+import API from '@/utils/api';
 
-const mentors = [
-  { name: 'Alice', image: require('../../assets/images/mentors/alice.png') },
-  { name: 'Bob', image: require('../../assets/images/mentors/alice.png') },
-  { name: 'Charlie', image: require('../../assets/images/mentors/alice.png') },
-  { name: 'Daisy', image: require('../../assets/images/mentors/alice.png') },
-  { name: 'Ethan', image: require('../../assets/images/mentors/alice.png') },
-];
+type User = {
+  _id: string;
+  fname: string;
+  lname: string;
+  email: string;
+  profileImage?: string;
+  role: string;
+};
 
-const allCourses = {
+type Course = {
+  id: string;
+  title: string;
+  duration: string;
+};
+
+const allCourses: Record<string, Course[]> = {
   All: [
     { id: '1', title: 'Intro to React', duration: '30m' },
     { id: '2', title: 'JSX Deep Dive', duration: '45m' },
-    // { id: '3', title: 'Hooks 101', duration: '1h 15m' },
   ],
   'Graphic Design': [
     { id: '4', title: 'Photoshop Basics', duration: '40m' },
@@ -39,59 +346,148 @@ const allCourses = {
   ],
 };
 
-
 const filterOptions = ['All', 'Graphic Design', 'UI/UX'];
 
 const HomeScreen = () => {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [user, setUser] = useState<User | null>(null);
+  const [mentors, setMentors] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          router.push('/(auth)/login');
+          return;
+        }
+
+        const [userResponse, mentorsResponse] = await Promise.all([
+          API.get('/api/auth/alluser'),
+          API.get('/api/auth/teachers', { params: { role: 'teacher', $limit: 5 } }),
+        ]);
+
+        setUser(userResponse.data);
+        setMentors(mentorsResponse.data || []);
+      } catch (error) {
+        console.error('Fetch error:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to load user data',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#4C51BF" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text>No user data found</Text>
+      </View>
+    );
+  }
+
+  const userInitials = `${user.fname?.[0] || ''}${user.lname?.[0] || ''}`;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Greeting Section */}
       <View style={styles.greetingContainer}>
         <View>
-          <Text style={styles.helloText}>Hi, Ronald A. Martin</Text>
-          <Text style={styles.subText}>What would you like to learn today? Search Below.</Text>
+          <Text style={styles.helloText}>Hi, {userInitials}</Text>
+          <Text style={styles.subText}>
+            {user.email} {"\n"}
+            What would you like to learn today?
+          </Text>
         </View>
-        <View style={styles.avatar} />
+        {user.profileImage ? (
+          <Image source={{ uri: user.profileImage }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <Text style={styles.avatarText}>{userInitials}</Text>
+          </View>
+        )}
       </View>
 
+      {/* Search Section */}
       <SafeAreaView style={{ flex: 1 }}>
         <SearchComponent />
       </SafeAreaView>
 
+      {/* Special Offer Box */}
       <View style={styles.specialBox}>
         <Text style={styles.specialOffer}>25% Off*</Text>
-        <Text style={styles.specialTitle}>Today’s Special</Text>
+        <Text style={styles.specialTitle}>Today's Special</Text>
         <Text style={styles.specialDesc}>
-          Get a Discount for Every Course Order only Valid for Today.!
+          Get a Discount for Every Course Order, only Valid for Today!
         </Text>
       </View>
 
+      {/* Categories Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Categories</Text>
-        <Text style={styles.sectionSeeAll}>See All ➤</Text>
+        <TouchableOpacity onPress={() => router.push('/category')}>
+          <Text style={styles.sectionSeeAll}>See All ➤</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.categories}>
-        <Text style={styles.category}>3D Design</Text>
-        <Text style={[styles.category, styles.activeCategory]}>Arts & Humanities</Text>
-        <Text style={styles.category}>Graphic Design</Text>
+        {['3D Design', 'Arts & Humanities', 'Graphic Design'].map((cat) => (
+          <Text
+            key={cat}
+            style={[
+              styles.category,
+              cat === 'Arts & Humanities' && styles.activeCategory,
+            ]}
+          >
+            {cat}
+          </Text>
+        ))}
       </View>
 
+      {/* Popular Course Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Popular Course </Text>
+        <Text style={styles.sectionTitle}>Popular Courses</Text>
         <TouchableOpacity onPress={() => router.push('/popular')}>
           <Text style={styles.sectionSeeAll}>See All ➤</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Mentors List */}
       <View style={styles.mentorRow}>
-        {mentors.map((mentor, index) => (
-          <MentorCard key={index} name={mentor.name} image={mentor.image} />
+        {mentors.map((mentor) => (
+          <MentorCard
+            key={mentor._id}
+            name={`${mentor.fname} ${mentor.lname}`}
+            image={
+              mentor.profileImage
+                ? { uri: mentor.profileImage }
+                : require('@/assets/images/icon.png')
+            }
+            specialty={mentor.role || 'General Education'}
+            rating={4.5}
+            onPress={() => router.push(`/(menter)/menterlist`)}
+          />
         ))}
       </View>
 
+      {/* Filter Chips */}
       <FlatList
         data={filterOptions}
         keyExtractor={(item) => item}
@@ -103,23 +499,29 @@ const HomeScreen = () => {
             style={[styles.chip, selectedCategory === item && styles.activeChip]}
             onPress={() => setSelectedCategory(item)}
           >
-            <Text style={[styles.chipText, selectedCategory === item && styles.activeChipText]}>{item}</Text>
+            <Text
+              style={[
+                styles.chipText,
+                selectedCategory === item && styles.activeChipText,
+              ]}
+            >
+              {item}
+            </Text>
           </TouchableOpacity>
         )}
       />
 
-      <View style={{ flex: 1 }}>
-        {/* <CourseCardPanel /> */}
-        <CourseSection
-          section={{ courses: allCourses[selectedCategory as keyof typeof allCourses] || [] }}
+      {/* Courses List Section */}
+      <CourseSection
+        section={{ courses: allCourses[selectedCategory] || [] }}
+        type="ongoing"
+        onVideoPress={(video: any) => {
+          console.log('Video pressed:', video);
+          router.push(`/(course)/completed`);
+        }}
+      />
 
-          type="ongoing"
-          onVideoPress={(video:any) => {
-            console.log('Video pressed:', video);
-          }}
-        />
-      </View>
-
+      {/* Top Mentors Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Top Mentors</Text>
         <TouchableOpacity onPress={() => router.push('/(menter)/menterlist')}>
@@ -128,23 +530,43 @@ const HomeScreen = () => {
       </View>
 
       <View style={styles.mentorRow}>
-        {mentors.map((mentor, index) => (
-          <MentorCard key={index} name={mentor.name} image={mentor.image} />
+        {mentors.slice(0, 5).map((mentor) => (
+          <MentorCard
+            key={mentor._id}
+            name={`${mentor.fname} ${mentor.lname}`}
+            image={
+              mentor.profileImage
+                ? { uri: mentor.profileImage }
+                : require('@/assets/images/icon.png')
+            }
+            specialty={mentor.role || 'General Education'}
+            rating={4.5}
+          />
         ))}
       </View>
     </ScrollView>
   );
 };
 
-
-
 export default HomeScreen;
 
+// --------------------
+// STYLES
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5F9FF',
     flex: 1,
     padding: 20,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F9FF',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#4C51BF',
   },
   greetingContainer: {
     flexDirection: 'row',
@@ -171,34 +593,19 @@ const styles = StyleSheet.create({
     borderColor: '#167F71',
     borderWidth: 2,
   },
-  searchBox: {
-    backgroundColor: 'white',
-    marginTop: 30,
-    borderRadius: 15,
-    height: 64,
-    flexDirection: 'row',
+  avatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#4C51BF',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
+    borderColor: '#167F71',
+    borderWidth: 2,
   },
-  searchIcon: {
-    fontSize: 20,
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#202244',
-  },
-  searchBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: '#0961F5',
+  avatarText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   specialBox: {
     backgroundColor: '#0961F5',
@@ -229,7 +636,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 80,
+    marginTop: 30,
   },
   sectionTitle: {
     fontSize: 18,
@@ -246,48 +653,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 20,
     marginTop: 10,
+    marginBottom: 20,
   },
   category: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#A0A4AB',
+    fontWeight: '600',
+    color: '#6D6D6D',
   },
   activeCategory: {
     color: '#0961F5',
   },
-  filterChips: {
-    // flexDirection: 'row',
-    // gap: 20,
-    // marginTop: 20,
+  mentorRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap', // allows wrapping on smaller screens
-    justifyContent: 'space-between', // distributes spacing automatically
-    alignItems: 'center',
-    marginTop: 20,
-    paddingHorizontal: 10,
-    gap: 0, // not supported, will handle with margins  
-    },
-  chip: {
-    backgroundColor: '#E8F1FF',
-    borderRadius: 15,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 10,
   },
-  chipText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#202244',
+  filterChips: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#E0E7FF',
+    borderRadius: 20,
   },
   activeChip: {
-    backgroundColor: '#167F71',
+    backgroundColor: '#4C51BF',
+  },
+  chipText: {
+    fontSize: 14,
+    color: '#4C51BF',
+    fontWeight: '600',
   },
   activeChipText: {
     color: 'white',
   },
-  mentorRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
 });
-
-

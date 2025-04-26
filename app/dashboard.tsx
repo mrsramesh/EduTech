@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to EduTech Dashboard 🎓 1234</Text>
+      <Text style={styles.title}>Welcome to EduTech Dashboard 🎓 12346</Text>
       <Button title="Logout" onPress={handleLogout} />
        
 
