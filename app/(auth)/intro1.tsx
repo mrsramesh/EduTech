@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet ,Button } from 'react-native';
 import { useRouter } from 'expo-router';
-import AnimatedButton from '../../components/common/AnimatedButton';
+import AnimatedButton from '@/components/common/AnimatedButton';
 export default function Category() {
     const router = useRouter();
   return (

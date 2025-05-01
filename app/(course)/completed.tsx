@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import SearchInput from '../../components/SearchInput';
-import CourseSection from '../../components/CourseSection';
+import SearchInput from '@/components/SearchInput';
+import CourseSection from '@/components/CourseSection';
 
 const sectionsData = [
   {

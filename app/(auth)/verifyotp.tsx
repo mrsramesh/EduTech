@@ -1,10 +1,10 @@
 import { View, Text, TextInput, Button, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import API from '../utils/api';
-import { AUTH_URL } from '../constants/urls';
+import API from '@/utils/api';
+import { AUTH_URL } from '@/constants/urls';
 import Toast from 'react-native-toast-message';
-import { AuthRoutes } from '../constants/routes';
+import { AuthRoutes } from '@/constants/routes';
 
 export default function VerifyOTP() {
   const { email } = useLocalSearchParams();

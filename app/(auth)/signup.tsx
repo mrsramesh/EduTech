@@ -199,8 +199,8 @@
 
 import { View, TextInput, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Image, Platform } from 'react-native';
 import { useState } from 'react';
-import API from '../utils/api';
-import { AUTH_URL } from '../constants/urls';
+import API from '@/utils/api';
+import { AUTH_URL } from '@/constants/urls';
 import Toast from 'react-native-toast-message';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';

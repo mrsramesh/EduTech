@@ -9,7 +9,7 @@ import {
   ImageSourcePropType
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import API from '../utils/api';
+import API from '@/utils/api';
 import Toast from 'react-native-toast-message';
 
 type User = {

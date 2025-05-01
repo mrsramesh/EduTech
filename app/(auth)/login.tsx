@@ -1,8 +1,8 @@
 import { View, Text, TextInput, Button, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import API from '../utils/api';
-import { AUTH_URL } from '../constants/urls';
+import API from '@/utils/api';
+import { AUTH_URL } from '@/constants/urls';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -30,9 +30,9 @@ console.log("Role:", res.data?.user?.role);
 
       // Role-based redirection
       if (user.role === 'teacher') {
-        router.push('/dashboard'); // if teacher, go to teacher dashboard
+        router.push('/(admin)/teacherDashboard'); // if teacher, go to teacher dashboard , /dashboard or (admin)/dashboard
       } else {
-        router.push('/(home)'); // student dashboard (admin)/deshboard 
+        router.push('/(tabs)/home'); // student dashboard (admin)/deshboard  , (home ) me index same hai 
       }
 
     } catch (err: any) {

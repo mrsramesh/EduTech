@@ -2,8 +2,8 @@
 import { View, Text, TextInput, Button, ScrollView, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import API from '../utils/api';
-import { AUTH_URL } from '../constants/urls';
+import API from '@/utils/api';
+import { AUTH_URL } from '@/constants/urls';
 import Toast from 'react-native-toast-message';
 
 export default function ProfileForm() {

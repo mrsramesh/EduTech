@@ -13,10 +13,10 @@ const { registerUser, loginUser, updateProfile } = require("../controllers/authC
 const protect = require("../middleware/authMiddleware");
 const upload = require("../middleware/multer"); // Import the middleware
 const { getTeachers } = require("../controllers/getTeachers");
-const { getStudents } = require("../controllers/getStudents");
-const { getAllUsers } = require("../controllers/getalluser");
+const { getStudents  } = require("../controllers/getStudents");
+const { getAllUsers ,getMe} = require("../controllers/getalluser");
 const { textauthuser } = require("../controllers/textauthuser");
-
+const {rozerpay} = require('../controllers/rozerpay')
 
 
 const router = express.Router();
@@ -30,7 +30,8 @@ router.get('/teachers', getTeachers);
 router.get('/students', getStudents);
 router.get('/alluser', getAllUsers);
 router.post('/test', textauthuser);
-
+router.post('/pay', rozerpay);//async (req, res) => {
+ router.get('/me',protect, getMe);
 
 
 

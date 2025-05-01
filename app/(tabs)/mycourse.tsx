@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import CourseCard from '../../components/CourseCard1';
-import SearchInput from '../../components/SearchInput'; // ✅ Import reusable component
+import CourseCard from '@/components/CourseCard1';
+import SearchInput from '@/components/SearchInput'; // ✅ Import reusable component
 
 const completedCourses = [
   {

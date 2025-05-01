@@ -92,7 +92,7 @@ import {
   Button,
   SafeAreaView 
 } from 'react-native';
-import SearchInput from '../../components/SearchInput';
+import SearchInput from '@/components/SearchInput';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Video from 'react-native-video';
 import { useNavigation } from '@react-navigation/native';

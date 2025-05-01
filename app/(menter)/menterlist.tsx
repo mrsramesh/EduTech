@@ -9,10 +9,10 @@ import {
   ActivityIndicator, 
   RefreshControl 
 } from 'react-native';
-import MentorCard from '../../components/mentor/MentorCard';
+import MentorCard from '@/components/mentor/MentorCard';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import API from '../utils/api';
+import API from '@/utils/api';
 import Toast from 'react-native-toast-message';
 
 type Mentor = {
