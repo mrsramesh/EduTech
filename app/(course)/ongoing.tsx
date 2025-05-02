@@ -1,103 +1,23 @@
-// import React, { useState } from 'react';
-// import { View, ScrollView, StyleSheet } from 'react-native';
-// import SearchInput from '../../components/SearchInput';
-// import CourseSection from '../../components/CourseSection';
 
-// const sectionsData = [
-//   {
-//     title: 'Section 01 - Introduction',
-//     totalDuration: '25 Mins',
-//     courses: [
-//       { id: '1', title: 'Why Using 3D Blender', duration: '15 Mins', videoUrl: '...' },
-//       { id: '2', title: '3D Blender Installation', duration: '10 Mins', videoUrl: '...' },
-//       { id: '11', title: 'Why Using 3D Blender', duration: '15 Mins', videoUrl: '...' },
-//       { id: '21', title: '3D Blender Installation', duration: '10 Mins', videoUrl: '...' },
-//     ],
-//   },
-//   {
-//     title: 'Section 02 - Graphic Design',
-//     totalDuration: '125 Mins',
-//     courses: [
-//       { id: '3', title: 'Take a Look Blender Interface', duration: '20 Mins', videoUrl: '...' },
-//       { id: '4', title: 'The Basic of 3D Modelling', duration: '25 Mins', videoUrl: '...' },
-//       { id: '5', title: 'Shading and Lighting', duration: '80 Mins', videoUrl: '...' },
-//     ],
-//   },
-//   {
-//     title: 'Section 03 - Introduction',
-//     totalDuration: '25 Mins',
-//     courses: [
-//       { id: '1', title: 'Why Using 3D Blender', duration: '15 Mins', videoUrl: '...' },
-//       { id: '2', title: '3D Blender Installation', duration: '10 Mins', videoUrl: '...' },
-//       { id: '11', title: 'Why Using 3D Blender', duration: '15 Mins', videoUrl: '...' },
-//       { id: '21', title: '3D Blender Installation', duration: '10 Mins', videoUrl: '...' },
-//     ],
-//   },
-//   {
-//     title: 'Section 04 - Graphic Design',
-//     totalDuration: '125 Mins',
-//     courses: [
-//       { id: '3', title: 'Take a Look Blender Interface', duration: '20 Mins', videoUrl: '...' },
-//       { id: '4', title: 'The Basic of 3D Modelling', duration: '25 Mins', videoUrl: '...' },
-//       { id: '5', title: 'Shading and Lighting', duration: '80 Mins', videoUrl: '...' },
-//     ],
-//   },
-// ];
 
-// export default function CompletedScreen() {
-//   const [text, setText] = useState('');
 
-//   const handleVideoPress = (video:any) => {
-//     // Navigate or play video here
-//     console.log('Play video: ', video.title);
-//   };
-
-//   return (
-//     <ScrollView style={styles.container}>
-//       <SearchInput
-//         value={text}
-//         onChangeText={setText}
-//         placeholder="Search users..."
-//       />
-//       {sectionsData.map((section, idx) => (
-//         <CourseSection 
-//           key={idx}
-//           section={section}
-//           type="ongoing"
-//           onVideoPress={handleVideoPress}
-//         />
-//       ))}
-//     </ScrollView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     padding: 16,
-//     backgroundColor: '#F7F9FC',
-//   },
-// });
-  // working well me nichi lock system laga raha hu . 
-  
-  
-  import React, { useState } from 'react';
-import { 
-  View, 
-  ScrollView, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Text, 
-  Alert, 
-  Modal, 
-  Button,
-  SafeAreaView 
+import React, { useState } from 'react';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Alert,
+  Modal,
+  SafeAreaView
 } from 'react-native';
-import SearchInput from '@/components/SearchInput';
+import { useRouter } from 'expo-router';
+import { Video, ResizeMode } from 'expo-av';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Video from 'react-native-video';
 import { useNavigation } from '@react-navigation/native';
+import SearchInput from '@/components/SearchInput';
 
-// Define types for our data
 type Course = {
   id: string;
   title: string;
@@ -130,12 +50,15 @@ const sectionsData: Section[] = [
   },
 ];
 
+
 export default function CompletedScreen() {
+  const router = useRouter();
   const navigation = useNavigation();
   const [text, setText] = useState('');
   const [hasPaid, setHasPaid] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<Course | null>(null);
   const [videoModalVisible, setVideoModalVisible] = useState(false);
+  const videoRef = React.useRef<Video>(null);
 
   const isSectionFree = (index: number) => index === 0;
 
@@ -145,13 +68,16 @@ export default function CompletedScreen() {
         'Premium Content',
         'This video is locked. Please make payment to access all content.',
         [
-          { text: 'Pay Now', onPress: () => setHasPaid(true) },
+          {
+            text: 'Pay Now',
+            onPress: () => router.push('/PaymentScreen' as any),
+          },
           { text: 'Cancel', style: 'cancel' },
         ]
       );
       return;
     }
-    
+
     setCurrentVideo(video);
     setVideoModalVisible(true);
   };
@@ -159,6 +85,9 @@ export default function CompletedScreen() {
   const closeVideoModal = () => {
     setVideoModalVisible(false);
     setCurrentVideo(null);
+    if (videoRef.current) {
+      videoRef.current.pauseAsync();
+    }
   };
 
   const handleBackPress = () => {
@@ -224,6 +153,7 @@ export default function CompletedScreen() {
           visible={videoModalVisible}
           animationType="slide"
           onRequestClose={closeVideoModal}
+          statusBarTranslucent
         >
           <View style={styles.videoModalContainer}>
             {currentVideo && (
@@ -236,15 +166,14 @@ export default function CompletedScreen() {
                   <View style={styles.videoModalHeaderPlaceholder} />
                 </View>
                 <Video
+                  ref={videoRef}
                   source={{ uri: currentVideo.videoUrl }}
                   style={styles.videoPlayer}
-                  controls={true}
-                  resizeMode="contain"
-                  paused={false}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                  shouldPlay
+                  isLooping
                 />
-                <View style={styles.videoInfo}>
-                  <Text style={styles.videoDuration}>{currentVideo.duration}</Text>
-                </View>
               </>
             )}
           </View>
@@ -254,6 +183,7 @@ export default function CompletedScreen() {
   );
 }
 
+// Keep your existing styles unchanged, just update the videoPlayer style:
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
