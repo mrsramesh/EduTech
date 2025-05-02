@@ -18,7 +18,7 @@ import SearchComponent from '@/components/common/SearchWithFilter';
 import CourseSection from '@/components/CourseSection';
 import MentorCard from '@/components/mentor/MentorCard';
 import API from '@/utils/api';
-import DiscountCards from '@/components/DiscountCard';
+import DiscountCard from '@/components/DiscountCard';
 import Categories from '@/components/CategoriesHome';
 
 type User = {
@@ -137,7 +137,8 @@ const HomeScreen = () => {
 
       {/* Special Offer Box */}
   <View style={{ marginTop: 20 }}>
-  <DiscountCards />
+
+  <DiscountCard />
 </View>
 
       {/* Categories Section */}
