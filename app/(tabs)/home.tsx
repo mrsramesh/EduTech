@@ -1,18 +1,3 @@
-// import { View, Text, StyleSheet } from 'react-native';
-
-// export default function HomeScreen() {
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.text}>🏠 Home Screen</Text>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-//   text: { fontSize: 24, fontWeight: 'bold' },
-// });
-
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -34,6 +19,8 @@ import SearchComponent from '@/components/common/SearchWithFilter';
 import CourseSection from '@/components/CourseSection';
 import MentorCard from '@/components/mentor/MentorCard';
 import API from '@/utils/api';
+import DiscountCard from '@/components/DiscountCard';
+import Categories from '@/components/CategoriesHome';
 
 type User = {
   _id: string;
@@ -129,9 +116,9 @@ const HomeScreen = () => {
       {/* Greeting Section */}
       <View style={styles.greetingContainer}>
         <View>
-          <Text style={styles.helloText}>Hi, {userInitials}</Text>
+          <Text style={styles.helloText}>Hi,  kanhaiya lal {userInitials}</Text>
           <Text style={styles.subText}>
-            {user.email} {"\n"}
+            {user.email} kanhu1@gmail.com{"\n\n "}
             What would you like to learn today?
           </Text>
         </View>
@@ -150,46 +137,25 @@ const HomeScreen = () => {
       </SafeAreaView>
 
       {/* Special Offer Box */}
-      <View style={styles.specialBox}>
-        <Text style={styles.specialOffer}>25% Off*</Text>
-        <Text style={styles.specialTitle}>Today's Special</Text>
-        <Text style={styles.specialDesc}>
-          Get a Discount for Every Course Order, only Valid for Today!
-        </Text>
-      </View>
+  <View style={{ marginTop: 20 }}>
+  <DiscountCard />
+</View>
 
       {/* Categories Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Categories</Text>
-        <TouchableOpacity onPress={() => router.push('/category')}>
-          <Text style={styles.sectionSeeAll}>See All ➤</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.categories}>
-        {['3D Design', 'Arts & Humanities', 'Graphic Design'].map((cat) => (
-          <Text
-            key={cat}
-            style={[
-              styles.category,
-              cat === 'Arts & Humanities' && styles.activeCategory,
-            ]}
-          >
-            {cat}
-          </Text>
-        ))}
-      </View>
+      <View style={{ paddingVertical: 16 }}>
+  <Categories />
+</View>
 
       {/* Popular Course Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Popular Courses</Text>
-        <TouchableOpacity onPress={() => router.push('/popular')}>
+        <TouchableOpacity onPress={() => router.push('/(home)/popular')}>
           <Text style={styles.sectionSeeAll}>See All ➤</Text>
         </TouchableOpacity>
       </View>
 
       {/* Mentors List */}
-      <View style={styles.mentorRow}>
+      {/* <View style={styles.mentorRow}>
         {mentors.map((mentor) => (
           <MentorCard
             key={mentor._id}
@@ -204,7 +170,7 @@ const HomeScreen = () => {
             onPress={() => router.push(`/(menter)/menterlist`)}
           />
         ))}
-      </View>
+      </View> */}
 
       {/* Filter Chips */}
       <FlatList
@@ -248,7 +214,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.mentorRow}>
+      {/* <View style={styles.mentorRow}>
         {mentors.slice(0, 5).map((mentor) => (
           <MentorCard
             key={mentor._id}
@@ -262,7 +228,23 @@ const HomeScreen = () => {
             rating={4.5}
           />
         ))}
-      </View>
+      </View> */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+  {mentors.slice(0, 5).map((mentor) => (
+    <MentorCard
+      key={mentor._id}
+      name={`${mentor.fname} ${mentor.lname}`}
+      image={
+        mentor.profileImage
+          ? { uri: mentor.profileImage }
+          : require('@/assets/images/icon.png')
+      }
+      specialty={mentor.role || 'General Education'}
+      rating={4.5}
+    />
+  ))}
+</ScrollView>
+      
     </ScrollView>
   );
 };
@@ -385,6 +367,7 @@ const styles = StyleSheet.create({
   mentorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: 10,
     marginTop: 10,
   },
