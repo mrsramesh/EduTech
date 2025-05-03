@@ -1,4 +1,6 @@
-import { View, Text, StyleSheet, Button ,ScrollView } from 'react-native';
+
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet ,TouchableOpacity,Dimensions} from 'react-native';
 import { useRouter } from 'expo-router';
 import CourseCard from '@/components/common/CourseCard';
 
@@ -7,58 +9,71 @@ export default function PopularCourses() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>🔥 Popular Courses</Text>
-      <Button
-        title="Go to Tabs"
-        onPress={() => {
-          router.push('/(tabs)/home'); // 👈 tab screen path
-        }}
-      />
+    
 
-<ScrollView contentContainerStyle={{ padding: 16 }}>
-      <CourseCard
-        title="Graphic Design Advanced"
-        category="Graphic Design"
-        price={28}
-        oldPrice={42}
-        rating={4.2}
-        students={7830}
-        image={require('../../assets/images/mentors/alice.png')} // replace with your image
-      />
-
-<CourseCard
-        title="Graphic Design Advanced"
-        category="Graphic Design"
-        price={28}
-        oldPrice={42}
-        rating={4.2}
-        students={7830}
-        image={require('../../assets/images/mentors/alice.png')} // replace with your image
-      />
-      <CourseCard
-        title="Graphic Design Advanced"
-        category="Graphic Design"
-        price={28}
-        oldPrice={42}
-        rating={4.2}
-        students={7830}
-        image={require('../../assets/images/mentors/alice.png')} // replace with your image
-      />
-      <CourseCard
-        title="Graphic Design Advanced"
-        category="Graphic Design"
-        price={28}
-        oldPrice={42}
-        rating={4.2}
-        students={7830}
-        image={require('../../assets/images/mentors/alice.png')} // replace with your image
-      />
-    </ScrollView>
+      <ScrollView 
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        decelerationRate="fast"
+        snapToInterval={Dimensions.get('window').width - 32 + 16}
+      >
+        <CourseCard
+          title="Advanced Graphic Design Masterclass"
+          category="Design"
+          price={28}
+          oldPrice={42}
+          rating={4.8}
+          students={7830}
+          image={require('../../assets/images/mentors/alice.png')}
+          isPopular={true}
+        />
+        <CourseCard
+          title="React Native from Zero to Hero"
+          category="Mobile Dev"
+          price={35}
+          oldPrice={50}
+          rating={4.9}
+          students={12500}
+          image={require('../../assets/images/mentors/alice.png')}
+        />
+        <CourseCard
+          title="Python Data Science Bootcamp"
+          category="Data Science"
+          price={45}
+          oldPrice={60}
+          rating={4.7}
+          students={9200}
+          image={require('../../assets/images/mentors/alice.png')}
+        />
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  text: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  container: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  seeAll: {
+    color: '#4A90E2',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  scrollContent: {
+    paddingRight: 16,
+    paddingBottom: 8,
+  },
 });

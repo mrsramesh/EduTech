@@ -1,10 +1,13 @@
 import { View, Text, StyleSheet ,Button } from 'react-native';
+import { Stack } from 'expo-router';
 import { useRouter } from 'expo-router';
-import AnimatedButton from '../../components/common/AnimatedButton';
+import AnimatedButton from '@/components/common/AnimatedButton';
 export default function Category() {
     const router = useRouter();
   return (
     <View style={styles.container}>
+      {/* Add this Stack.Screen configuration */}
+    
       <Text style={styles.text}>Online Learing ..... 📚</Text>
       {/* <View style={styles.buttonGroup}>
        <Button title="move to intro2" onPress={() => router.push('/intro2')} />

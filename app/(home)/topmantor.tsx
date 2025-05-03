@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { useRouter } from 'expo-router';
-import API from '../utils/api';
-import { AUTH_URL } from '../constants/urls';
+import API from '@/utils/api';
+import { AUTH_URL } from '@/constants/urls';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

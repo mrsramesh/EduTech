@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet ,Button } from 'react-native';
 import { useRouter } from 'expo-router';
-import AnimatedButton from '../../components/common/AnimatedButton';
-import CelebrationCard from '../../components/common/CongratulationCard';
+import AnimatedButton from '@/components/common/AnimatedButton';
+import CelebrationCard from '@/components/common/CongratulationCard';
 
 export default function Category() {
     const router = useRouter();

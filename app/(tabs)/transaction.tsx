@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native';
-import CourseCard from '../../components/CourseCard'//'../components/CourseCard';
+import CourseCard from '@/components/CourseCard'//'../components/CourseCard';
 import {useRouter} from 'expo-router';
 
 export default function TransactionScreen() {
