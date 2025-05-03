@@ -1,8 +1,8 @@
 
-const BASE_URL =   'http://192.168.3.136:5000/api'//'http://localhost:5000/api';
+const BASE_URL =   'http://192.168.3.136:5001/api'//'http://localhost:5000/api';
 
 
-export const AUTH_URL = {
+export const  AUTH_URL = {
   REGISTER: `${BASE_URL}/auth/register`,
   LOGIN: `${BASE_URL}/auth/login`,
   FORGOT_PASSWORD: `${BASE_URL}/auth/forgot-password`,

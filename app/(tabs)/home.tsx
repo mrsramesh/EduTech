@@ -70,7 +70,7 @@ const HomeScreen = () => {
         }
 
         const [userResponse, mentorsResponse] = await Promise.all([
-          API.get('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+          API.get('/api/auth/teachers', { headers: { Authorization: `Bearer ${token}` } }),
           API.get('/api/auth/teachers'),
         ]);
 
@@ -108,15 +108,15 @@ const HomeScreen = () => {
     );
   }
 
-  const userInitials = `${user.fname?.[0] || ''}${user.lname?.[0] || ''}`;
+ // const userInitials = `${user.fname?.[0] || ''}${user.lname?.[0] || ''}`;
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.greetingContainer}>
+      {/* <View style={styles.greetingContainer}>
         <View>
-          <Text style={styles.helloText}>Hi, {user.fname} </Text>
+          <Text style={styles.helloText}>Hi, </Text>
           <Text style={styles.subText}>
-            {user.email}{"\n\n"}
+            {"\n\n"}
             What would you like to learn today?
           </Text>
         </View>
@@ -124,10 +124,10 @@ const HomeScreen = () => {
           <Image source={{ uri: user.profileImage }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>{userInitials}</Text>
+            <Text style={styles.avatarText}></Text>
           </View>
         )}
-      </View>
+      </View> */}
 
       <SafeAreaView style={{ flex: 1 }}>
         <SearchComponent />
@@ -141,14 +141,14 @@ const HomeScreen = () => {
         <Categories />
       </View>
 
-      <View style={styles.section}>
+      {/* <View style={styles.section}>
         <Text style={styles.sectionTitle}>Popular Courses</Text>
         <TouchableOpacity onPress={() => router.push('/(home)/popular')}>
           <Text style={styles.sectionSeeAll}>See All ➤</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
-      <FlatList
+      {/* <FlatList
         data={filterOptions}
         keyExtractor={(item) => item}
         horizontal
@@ -169,15 +169,15 @@ const HomeScreen = () => {
             </Text>
           </TouchableOpacity>
         )}
-      />
-
+      /> */}
+{/* 
       <CourseSection
         section={{ courses: allCourses[selectedCategory] || [] }}
         type="ongoing"
         onVideoPress={(video: any) => {
           router.push(`/(course)/completed`);
         }}
-      />
+      /> */}
 
     </ScrollView>
   );
