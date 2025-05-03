@@ -179,28 +179,6 @@ const HomeScreen = () => {
         }}
       />
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Top Mentors</Text>
-        <TouchableOpacity onPress={() => router.push('/(menter)/menterlist')}>
-          <Text style={styles.sectionSeeAll}>See All ➤</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
-        {mentors.slice(0, 5).map((mentor) => (
-          <MentorCard
-            key={mentor._id}
-            name={`${mentor.fname} ${mentor.lname}`}
-            image={
-              mentor.profileImage
-                ? { uri: mentor.profileImage }
-                : require('@/assets/images/icon.png')
-            }
-            specialty={mentor.role || 'General Education'}
-            rating={4.5}
-          />
-        ))}
-      </ScrollView>
     </ScrollView>
   );
 };

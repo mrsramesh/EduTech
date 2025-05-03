@@ -1,11 +1,18 @@
 import { Slot, Stack } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { StatusBar } from 'expo-status-bar';
-
+// add redusx files 
+import { Provider } from 'react-redux';
+import {store} from '../redux/store';
 export default function RootLayout() {
   return (
     <>
-      <Stack>
+      <Provider store={store}>
+      <Stack 
+        screenOptions={{
+          // Set default options for all screens here
+          headerShown: false,
+        }} >
         <Stack.Screen 
           name="(auth)" 
           options={{ headerShown: false }} 
@@ -21,6 +28,7 @@ export default function RootLayout() {
       </Stack>
       <Toast />
       <StatusBar style="auto" />
+      </Provider>
     </>
   );
 }

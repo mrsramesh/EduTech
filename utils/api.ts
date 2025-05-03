@@ -1,20 +1,9 @@
-// import axios from 'axios';
-
-// const API = axios.create({
-//   baseURL: 'http://localhost:5000',  // 'http://<your-ip>:5000/api', // Replace with your backend IP
-// });
-
-// export default API;
-
-
-// In your API utility file
-
 import axios from 'axios';
 
 
 const API = axios.create({
-  //baseURL: 'http://localhost:5000', // for web 
-  baseURL: 'http://192.168.1.4:5001', // for mobile . 
+  baseURL: 'http://192.168.1.4:5001', 
+
 
   timeout: 10000,
   headers: {

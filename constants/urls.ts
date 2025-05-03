@@ -1,4 +1,4 @@
-const BASE_URL = process.env.API_BASE_URL ||  'http://192.168.1.4:5001/api'
+const BASE_URL = process.env.API_BASE_URL ||  'http://192.168.1.4:5001'//'http://localhost:5000/api';
 export const AUTH_URL = {
   REGISTER: `${BASE_URL}/auth/register`,
   LOGIN: `${BASE_URL}/auth/login`,
