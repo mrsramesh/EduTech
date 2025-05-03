@@ -47,7 +47,7 @@ export default function Category() {
   const renderCategoryItem = ({ item }: { item: (typeof categories)[0] }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => router.push('/courselist')} // Later you can use dynamic ID like `/courselist/${item.id}`
+     // onPress={() => router.push('/####')} // Later you can use dynamic ID like `/courselist/${item.id}`
     >
       <Image source={{ uri: item.image }} style={styles.cardImage} />
       <Text style={styles.cardTitle}>{item.name}</Text>
@@ -56,7 +56,7 @@ export default function Category() {
 
   return (
     <View style={styles.container}>
-      <SearchComponent />
+      {/* <SearchComponent /> */}
 
       <FlatList
         data={categories}
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F9FF',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 60,
   },
   listContent: {
     paddingBottom: 50,

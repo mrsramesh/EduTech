@@ -4,7 +4,7 @@
 //     PROFILE: "/api/auth/profile"
 //   };
 
-const BASE_URL =   'http://192.168.1.7:5000/api'//'http://localhost:5000/api';
+const BASE_URL =   'http://192.168.3.136:5000/api'//'http://localhost:5000/api';
 
 export const AUTH_URL = {
   REGISTER: `${BASE_URL}/auth/register`,
