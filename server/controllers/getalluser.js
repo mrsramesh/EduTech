@@ -4,7 +4,7 @@ const asyncHandler = require("express-async-handler");
 // Get all users (students + teachers + others)
 exports.getAllUsers = asyncHandler(async (req, res) => {
   try {
-    const users = await User.find().select('fname lname email role');
+    const users = await User.find().select('fname lname email role profileImage');
 
     if (!users || users.length === 0) {
       return res.status(404).json({ message: "No users found" });
@@ -20,34 +20,27 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
 exports.getMe = async (req, res) => {
   try {
-    // req.user में authenticate middleware (JWT) द्वारा user ID सेट की गई है
     const user = await User.findById(req.user.id).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
     res.status(200).json({
       success: true,
-      data: user
+      data: user,
     });
-    
   } catch (error) {
     console.error('Get me error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };
-
-

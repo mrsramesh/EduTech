@@ -70,11 +70,11 @@ const HomeScreen = () => {
         }
 
         const [userResponse, mentorsResponse] = await Promise.all([
-          API.get('/api/auth/alluser'),
-          API.get('/api/auth/teachers', { params: { role: 'teacher', $limit: 5 } }),
+          API.get('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+          API.get('/api/auth/teachers'),
         ]);
 
-        setUser(userResponse.data);
+        setUser(userResponse.data.data);
         setMentors(mentorsResponse.data || []);
       } catch (error) {
         console.error('Fetch error:', error);
@@ -112,12 +112,11 @@ const HomeScreen = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Greeting Section */}
       <View style={styles.greetingContainer}>
         <View>
-          <Text style={styles.helloText}>Hi,  kanhaiya lal {userInitials}</Text>
+          <Text style={styles.helloText}>Hi, {user.fname} </Text>
           <Text style={styles.subText}>
-            {user.email} kanhu1@gmail.com{"\n\n "}
+            {user.email}{"\n\n"}
             What would you like to learn today?
           </Text>
         </View>
@@ -130,23 +129,18 @@ const HomeScreen = () => {
         )}
       </View>
 
-      {/* Search Section */}
       <SafeAreaView style={{ flex: 1 }}>
         <SearchComponent />
       </SafeAreaView>
 
-      {/* Special Offer Box */}
-  <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: 20 }}>
+        <DiscountCard />
+      </View>
 
-  <DiscountCard />
-</View>
-
-      {/* Categories Section */}
       <View style={{ paddingVertical: 16 }}>
-  <Categories />
-</View>
+        <Categories />
+      </View>
 
-      {/* Popular Course Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Popular Courses</Text>
         <TouchableOpacity onPress={() => router.push('/(home)/popular')}>
@@ -154,7 +148,6 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Filter Chips */}
       <FlatList
         data={filterOptions}
         keyExtractor={(item) => item}
@@ -178,47 +171,42 @@ const HomeScreen = () => {
         )}
       />
 
-      {/* Courses List Section */}
       <CourseSection
         section={{ courses: allCourses[selectedCategory] || [] }}
         type="ongoing"
         onVideoPress={(video: any) => {
-          console.log('Video pressed:', video);
           router.push(`/(course)/completed`);
         }}
       />
 
-      {/* Top Mentors Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Top Mentors</Text>
         <TouchableOpacity onPress={() => router.push('/(menter)/menterlist')}>
           <Text style={styles.sectionSeeAll}>See All ➤</Text>
         </TouchableOpacity>
       </View>
+
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
-  {mentors.slice(0, 5).map((mentor) => (
-    <MentorCard
-      key={mentor._id}
-      name={`${mentor.fname} ${mentor.lname}`}
-      image={
-        mentor.profileImage
-          ? { uri: mentor.profileImage }
-          : require('@/assets/images/icon.png')
-      }
-      specialty={mentor.role || 'General Education'}
-      rating={4.5}
-    />
-  ))}
-</ScrollView>
-      
+        {mentors.slice(0, 5).map((mentor) => (
+          <MentorCard
+            key={mentor._id}
+            name={`${mentor.fname} ${mentor.lname}`}
+            image={
+              mentor.profileImage
+                ? { uri: mentor.profileImage }
+                : require('@/assets/images/icon.png')
+            }
+            specialty={mentor.role || 'General Education'}
+            rating={4.5}
+          />
+        ))}
+      </ScrollView>
     </ScrollView>
   );
 };
 
 export default HomeScreen;
 
-// --------------------
-// STYLES
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5F9FF',
@@ -233,131 +221,70 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
+    fontSize: 16,
     color: '#4C51BF',
   },
   greetingContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 30,
   },
   helloText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#202244',
-  },
-  subText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: 'rgba(84,84,84,0.8)',
-    marginTop: 5,
-    maxWidth: 250,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderColor: '#167F71',
-    borderWidth: 2,
-  },
-  avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#4C51BF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: '#167F71',
-    borderWidth: 2,
-  },
-  avatarText: {
-    color: 'white',
+    fontSize: 22,
     fontWeight: 'bold',
   },
-  specialBox: {
-    backgroundColor: '#0961F5',
-    borderRadius: 22,
-    padding: 20,
-    marginTop: 30,
+  subText: {
+    marginTop: 4,
+    color: '#777',
   },
-  specialOffer: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: '800',
-    textTransform: 'uppercase',
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
-  specialTitle: {
-    color: 'white',
-    fontSize: 22,
-    fontWeight: '800',
-    marginTop: 5,
+  avatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#c5c5c5',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  specialDesc: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: '800',
-    marginTop: 10,
-    maxWidth: 250,
+  avatarText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   section: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#202244',
+    fontWeight: 'bold',
   },
   sectionSeeAll: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#0961F5',
-    textTransform: 'uppercase',
-  },
-  categories: {
-    flexDirection: 'row',
-    gap: 20,
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  category: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#6D6D6D',
-  },
-  activeCategory: {
-    color: '#0961F5',
-  },
-  mentorRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginTop: 10,
+    color: '#4C51BF',
   },
   filterChips: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 20,
-    marginBottom: 20,
+    marginVertical: 12,
   },
   chip: {
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: '#E0E7FF',
+    backgroundColor: '#E2E8F0',
     borderRadius: 20,
+    marginRight: 10,
   },
   activeChip: {
     backgroundColor: '#4C51BF',
   },
   chipText: {
-    fontSize: 14,
-    color: '#4C51BF',
-    fontWeight: '600',
+    color: '#1A202C',
   },
   activeChipText: {
-    color: 'white',
+    color: '#fff',
   },
 });

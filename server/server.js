@@ -21,9 +21,8 @@ if (!fs.existsSync(uploadsDir)) {
 connectDB();
 
 // Middleware
-//app.use(cors());
 app.use(cors({
-  origin: '*', // For testing only. Replace with exact IP in production.
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
@@ -38,6 +37,6 @@ app.use('/api/payment', paymentRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5001;
-server.listen(PORT,'0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
