@@ -367,7 +367,7 @@ type ChatMessage = {
 };
 
 type ChatScreenProps = {
-  route: {
+  route?: {
     params?: {
       currentUserId: string;
       otherUserId: string;
@@ -381,7 +381,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
     currentUserId = 'current-user-id', 
     otherUserId = 'other-user-id', 
     roomId = 'default-room' 
-  } = route.params || {};
+  } = route?.params || {};
   
   const [message, setMessage] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
