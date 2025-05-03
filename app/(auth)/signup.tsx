@@ -5,6 +5,7 @@ import { AUTH_URL } from '@/constants/urls';
 import Toast from 'react-native-toast-message';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 
 export default function SignUp() {
   const [form, setForm] = useState({ 
@@ -130,20 +131,26 @@ export default function SignUp() {
       }
 
       // Submit form
-      const response = await API.post(AUTH_URL.REGISTER, formData, {
+      // console.log("Calling API:", AUTH_URL.REGISTER);
+      // const response = await API.post(AUTH_URL.REGISTER, formData, {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
+
+      const response = await axios.post(AUTH_URL.REGISTER, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        transformRequest: () => formData,
       });
-
-      if (response.data.success) {
+      console.log('Signup response:', response.data);
+      if (response.data.user) {
         Toast.show({
           type: 'success',
           text1: 'Account created!',
           text2: 'You can now log in'
         });
-        router.replace('/(auth)/login');
+        router.push('/(auth)/login');
       }
     } catch (error: any) {
       console.error('Registration error:', error);
