@@ -185,6 +185,7 @@
 // });
 
 // export default DiscountCard;
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';

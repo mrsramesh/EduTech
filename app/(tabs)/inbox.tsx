@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 // Reusable Type for chat or call data item
 type MessageItem = {
@@ -114,6 +115,7 @@ export default function InboxScreen(): JSX.Element {
 
   const data = activeTab === 'Chat' ? chatData : callsData;
 
+  
   return (
     <View style={styles.container}>
       <View style={styles.tabRow}>
@@ -142,6 +144,13 @@ export default function InboxScreen(): JSX.Element {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+      <TouchableOpacity
+  style={styles.newChatButton}
+  onPress={() => router.push('/(chat)/contectBook')}
+>
+  <Ionicons name="person-add" size={24} color="white" />
+</TouchableOpacity>
+
     </View>
   );
 }
@@ -229,5 +238,21 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginLeft: 4,
+  },
+  newChatButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
