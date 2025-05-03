@@ -1,4 +1,3 @@
-
 import { Slot, Stack } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { StatusBar } from 'expo-status-bar';

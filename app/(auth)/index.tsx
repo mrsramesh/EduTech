@@ -1,12 +1,14 @@
+
  import { useEffect } from 'react';
  import { router } from 'expo-router';
 
   import React from 'react';
+
 import { 
   View, 
   Text, 
   StyleSheet, 
-  Dimensions, 
+  Dimensions,
   TouchableOpacity, 
   ImageBackground,
   ScrollView,
