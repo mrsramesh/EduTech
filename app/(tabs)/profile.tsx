@@ -24,6 +24,7 @@ const ProfileScreen = () => {
     { title: 'Terms & Conditions', icon: 'file-text',  },
     // { title: 'Help Center', icon: 'help-circle', screen: 'HelpCenter' },
     { title: 'Invite Friends', icon: 'user-plus', screen: 'intivefriends' },
+    { title: 'LogOut', icon: 'log-out', screen: 'login' },
   ];
 
   return (
@@ -47,7 +48,10 @@ const ProfileScreen = () => {
             style={styles.optionRow}
             // onPress={() => router.push(`/(profile)/${screen}` as any)}
             onPress={() => {
-              if (screen === 'PaymentScreen') {
+              if(screen === 'login'){
+                router.push(`/(auth)/${screen}` as any);
+              }
+              else if (screen === 'PaymentScreen') {
                 router.push(`/(payment)/${screen}` as any);
               } else {
                 router.push(`/(profile)/${screen}` as any);

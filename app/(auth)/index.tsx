@@ -269,7 +269,7 @@ const TeleadApp = () => {
 
     const timer = setTimeout(() => {
       router.replace('/(auth)/login');
-    }, 3000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
