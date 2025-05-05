@@ -1,5 +1,5 @@
 
-const BASE_URL =   'http://192.168.3.136:5001/api'//'http://localhost:5000/api';
+const BASE_URL =   'http://192.168.1.14:5001/api'//'http://localhost:5000/api';
 
 
 export const  AUTH_URL = {
@@ -10,3 +10,10 @@ export const  AUTH_URL = {
   RESET_PASSWORD: `${BASE_URL}/auth/reset-password`,
   UPDATE_PROFILE: `${BASE_URL}/auth/update-profile`,
 };
+
+
+export const  ADMIN_URL = {
+  CREATE_COURSE: `${BASE_URL}/courses/create`,
+};
+
+

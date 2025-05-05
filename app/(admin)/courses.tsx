@@ -1,31 +1,61 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
+import { ADMIN_URL } from '@/constants/urls';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function DashboardHome() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [createdBy, setCreatedBy] = useState('');
+  const [token, setToken] = useState('');
+  
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token');
+        if (storedToken) {
+          setToken(storedToken);
+        }
+      } catch (error) {
+        console.error('Failed to fetch token:', error);
+      }
+    };
+    fetchToken();
+  }, []);
 
   const handleCreateCourse = async () => {
-    if (!title || !description || !createdBy) {
+    try {
+    if (!title || !description ) {
       Toast.show({ type: 'error', text1: 'All fields are required' });
       return;
     }
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/courses/create', {
+    
+      const response = await axios.post(`${ADMIN_URL.CREATE_COURSE}`, {
         title,
         description,
-        createdBy,
-      });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      Toast.show({ type: 'success', text1: 'Course created successfully' });
-      setTitle('');
-      setDescription('');
-      setCreatedBy('');
+      console.log(response);
+
+      if(response){
+        Toast.show({ type: 'success', text1: 'Course created successfully' });
+        setTitle('');
+        setDescription('');
+        setCreatedBy('');
+      }
+      
     } catch (error) {
+      console.error("Course creation error:", error?.response?.data || error.message || error);
       Toast.show({
         type: 'error',
         text1: 'Error creating course',
