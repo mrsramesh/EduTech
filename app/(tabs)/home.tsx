@@ -20,6 +20,8 @@ import CourseSection from '@/components/CourseSection';
 import API from '@/utils/api';
 import DiscountCard from '@/components/DiscountCard';
 import Categories from '@/components/CategoriesHome';
+import { RootState } from '@/redux/store'; // Import your store type
+import { useSelector } from 'react-redux';
 
 // Types
 type User = {
@@ -37,6 +39,10 @@ const HomeScreen = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+    // Access specific data from Redux store
+  const user1 = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.token);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -135,7 +141,11 @@ const HomeScreen = () => {
           <CourseSection />
         </View>
       </View>
+      {/* //<Text>Welcome, {user1?.name}</Text> */}
+      <Text>Email: {user1?.email}</Text>
+      <Text>Role: {user1?.role}</Text>
     </ScrollView>
+
   );
 };
 
