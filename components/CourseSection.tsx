@@ -3,34 +3,41 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import CourseCard from './CourseCard';
 
 interface Course {
-  id: string;
+  _id: string;
   title: string;
   duration: string;
   progress: number;
   category: string;
+  description: string;
 }
+
 
 const courses: Course[] = [
   {
-    id: '1',
+    _id: '1',
     title: 'UI/UX Fundamentals',
     duration: '12h',
-    progress: 0.6,
+    progress: 60,
     category: 'Design',
+    description: 'Learn UI/UX design principles'
   },
   {
-    id: '2',
+    _id: '2',
     title: 'React Native Mastery',
     duration: '20h',
     progress: 0.3,
     category: 'Development',
+    description: 'Learn React-Native'
+
   },
   {
-    id: '3',
+    _id: '3',
     title: 'Digital Marketing',
     duration: '8h',
     progress: 0.8,
     category: 'Marketing',
+    description: 'Learn Digital Marketing principles'
+
   },
 ];
 
@@ -40,7 +47,7 @@ const CourseSection: React.FC = () => {
       data={courses}
       horizontal
       showsHorizontalScrollIndicator={false}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item._id}
       contentContainerStyle={styles.list}
       renderItem={({ item }) => <CourseCard course={item} />}
     />
