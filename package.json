@@ -67,7 +67,8 @@
     "react-native-webview": "13.12.5",
     "react-redux": "^9.2.0",
     "socket.io-client": "^4.8.1",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "vector-icons": "^0.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

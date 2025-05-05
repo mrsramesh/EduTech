@@ -1,118 +1,110 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
-import { Video, ResizeMode  } from "expo-av";
-import { useRouter } from "expo-router";
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-const { width } = Dimensions.get("window");
-
-interface CourseCardProps {
-  title: string;
-  subject: string;
-  videoUrl: string;
-  onPressPaid?: () => void;
+interface CourseProps {
+  course: {
+    id: string;
+    title: string;
+    duration: string;
+    progress: number;
+    category: string;
+  };
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ title, subject, videoUrl, onPressPaid }) => {
-  const router = useRouter();
-
-  const handlePress = () => {
-    router.push({
-      pathname: "/(payment)/receipt",
-      params: {
-        title,
-        subject,
-        email: "shoemake.redial@gmail.com",
-        name: "Scott R. Shoemake",
-        transactionId: "SK345680976",
-        course: "3d Character Illustration Cre..",
-        category: "Web Development",
-        price: "$55.00",
-        date: "Nov 20, 202X",
-        time: "15:45",
-        status: "Paid",
-        orderId: "25234567",
-        invoiceId: "28646345",
-      },
-    });
-  };
-
+const CourseCard: React.FC<CourseProps> = ({ course }) => {
   return (
-    <TouchableOpacity style={styles.card} onPress={handlePress}>
-      <Video
-        source={{ uri: videoUrl }}
-        rate={1.0}
-        volume={1.0}
-        resizeMode={ResizeMode.COVER}
-        shouldPlay={false}
-        isMuted={true}
-        style={styles.video}
-      />
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subject}>{subject}</Text>
-        <TouchableOpacity style={styles.paidButton} onPress={onPressPaid}>
-          <Text style={styles.paidText}>Paid</Text>
-        </TouchableOpacity>
+    <TouchableOpacity style={styles.container}>
+      <View style={styles.header}>
+        <View style={[styles.iconContainer, { backgroundColor: '#F4EBFF' }]}>
+          <Ionicons name="book" size={20} color="#7F56D9" />
+        </View>
+        <Text style={styles.duration}>{course.duration}</Text>
+      </View>
+      
+      <View style={styles.content}>
+        <Text style={styles.title}>{course.title}</Text>
+        <Text style={styles.category}>{course.category}</Text>
+      </View>
+
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBar}>
+          <View 
+            style={[
+              styles.progressFill,
+              { width: `${course.progress * 100}%` }
+            ]}
+          />
+        </View>
+        <Text style={styles.progressText}>
+          {Math.round(course.progress * 100)}% Complete
+        </Text>
       </View>
     </TouchableOpacity>
   );
 };
 
-export default CourseCard;
-
 const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    backgroundColor: "#ffffff",
-    padding: 12,
+  container: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    marginVertical: 10,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
+    width: 240,
+    padding: 16,
+    marginRight: 16,
+    shadowColor: '#7F56D9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
     elevation: 3,
-    width: width - 40,
-    alignSelf: "center",
   },
-  video: {
-    width: 40,
-    height: 40,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  iconContainer: {
+    padding: 8,
     borderRadius: 8,
-    backgroundColor: "#e0e0e0",
   },
-  textContainer: {
-    marginLeft: 12,
-    flex: 1,
+  duration: {
+    color: '#667085',
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+  },
+  content: {
+    marginBottom: 24,
   },
   title: {
+    color: '#101828',
     fontSize: 16,
-    fontWeight: "700",
-    color: "#333",
+    fontFamily: 'Inter-SemiBold',
+    marginBottom: 8,
   },
-  subject: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 2,
+  category: {
+    color: '#7F56D9',
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
   },
-  paidButton: {
-    marginTop: 6,
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 6,
-    alignSelf: "flex-start",
+  progressContainer: {
+    marginBottom: 8,
   },
-  paidText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 13,
+  progressBar: {
+    height: 4,
+    backgroundColor: '#F4EBFF',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#7F56D9',
+  },
+  progressText: {
+    color: '#667085',
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    marginTop: 4,
   },
 });
+
+export default CourseCard;
