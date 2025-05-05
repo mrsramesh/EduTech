@@ -35,9 +35,7 @@ app.use('/uploads', express.static(uploadsDir));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/payment', paymentRoutes);
-
-const courseRoutes = require("./routes/courseRoute");
-app.use('/api/courses',courseRoutes); 
+app.use('/api/courses', require('./routes/courseRoute')); 
 
 // Start server
 const PORT = process.env.PORT || 5001;
