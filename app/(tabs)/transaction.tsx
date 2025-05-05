@@ -9,18 +9,24 @@ export default function TransactionScreen() {
     <View style={styles.container}>
       <Text style={styles.text}>💰 Transaction Screen</Text>
       <ScrollView>
+      <CourseCard course={{
+  id: "1",
+  title: "Master React Native",
+  duration: "10h 20m",
+  progress: 0.75,
+  category: "Mobile Development"
+}} />
       <CourseCard
-        title="Master React Native"
-        subject="Mobile Development"
-        videoUrl="https://www.w3schools.com/html/mov_bbb.mp4"
-        onPressPaid={() => router.push('/(payment)/receipt')}
-      />
-      <CourseCard
-        title="Data Structures in JS"
-        subject="Computer Science"
-        videoUrl="https://www.w3schools.com/html/movie.mp4"
-        onPressPaid={() => alert('Redirecting to payment')}
-      />
+  title="Master React Native"
+  subject="Mobile Development"
+  videoUrl="https://example.com/video.mp4"
+  onPressPaid={() => router.push('/(payment)/receipt')}
+/>,
+{/* <CourseCard
+  course={existingCourse}
+  onPressPaid={() => router.push('/(payment)/receipt')}
+  progress={0.9} // Override progress
+/> */}
     </ScrollView>
     </View>
   );

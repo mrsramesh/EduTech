@@ -54,7 +54,7 @@ const Categories = () => {
           style={styles.seeAllButton}
         >
           <Text style={styles.seeAllText}>See All</Text>
-          <Ionicons name="chevron-forward" size={16} color="#4A90E2" />
+          <Ionicons name="chevron-forward" size={16} color="#7F56D9" />
         </TouchableOpacity>
       </View>
 
@@ -87,7 +87,7 @@ const Categories = () => {
                 <Ionicons 
                   name={getCategoryIcon(category)} 
                   size={20} 
-                  color={activeCategory === category ? '#FFF' : '#4A90E2'} 
+                  color={activeCategory === category ? '#FFF' : '#7F56D9'} 
                 />
               </View>
               <Text 
@@ -133,18 +133,17 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
     fontFamily: 'Inter-Bold',
+    color: '#101828',
   },
   seeAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   seeAllText: {
-    color: '#4A90E2',
+    color: '#7F56D9',
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
     marginRight: 4,
   },
   scrollContent: {
@@ -154,23 +153,23 @@ const styles = StyleSheet.create({
     width: CATEGORY_WIDTH,
     height: 120,
     backgroundColor: '#FFF',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#EDEDED',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderColor: '#F2F4F7',
+    shadowColor: '#7F56D9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 3,
   },
   activeCategoryCard: {
-    backgroundColor: '#4A90E2',
-    borderColor: '#4A90E2',
-    shadowColor: '#4A90E2',
+    backgroundColor: '#7F56D9',
+    borderColor: '#7F56D9',
+    shadowColor: '#7F56D9',
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
@@ -179,7 +178,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(74,144,226,0.1)',
+    backgroundColor: '#F4EBFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -189,12 +188,12 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontFamily: 'Inter-SemiBold',
+    color: '#667085',
     textAlign: 'center',
   },
   activeCategoryText: {
-    color: '#FFF',
+    color: '#FFFFFF',
   },
 });
 
