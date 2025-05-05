@@ -70,7 +70,7 @@ const HomeScreen = () => {
         }
 
         const [userResponse, mentorsResponse] = await Promise.all([
-          API.get('/api/auth/teachers', { headers: { Authorization: `Bearer ${token}` } }),
+          API.get('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
           API.get('/api/auth/teachers'),
         ]);
 

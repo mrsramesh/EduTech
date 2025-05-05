@@ -7,8 +7,9 @@ import {
   FlatList,
 } from 'react-native';
 import CourseCard from '@/components/CourseCard1';
-import SearchInput from '@/components/SearchInput'; // ✅ Import reusable component
-
+import SearchInput from '@/components/SearchInput';
+ // ✅ Import reusable component
+ import CertificateCard from '@/components/CertificateCompleteCard';
 const completedCourses = [
   {
     id: '1',
@@ -141,6 +142,12 @@ export default function MyCourseScreen() {
           </Text>
         }
       />
+      <CertificateCard 
+  courseName="Advanced React Native Development"
+  studentName="Your Student Name"
+  completionDate="June 15, 2025"
+  instructorName="Course Instructor"
+  />
     </View>
   );
 }
