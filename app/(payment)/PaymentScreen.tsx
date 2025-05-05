@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import axios from 'axios';
 import { useSubscription } from '../context/SubscriptionContext'; // Adjust path if needed
 import { router } from 'expo-router';
+import { AUTH_URL } from '@/constants/urls';
 
 const PaymentScreen: React.FC = () => {
   const { setSubscribed } = useSubscription();
@@ -13,7 +14,7 @@ const PaymentScreen: React.FC = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const { data } = await axios.post('http://192.168.1.4:5001/api/payment/create-order');
+        const { data } = await axios.post(AUTH_URL.PAYMENT);
 
         const options = {
           key: 'rzp_test_Kf8fzScnGfUBMN',

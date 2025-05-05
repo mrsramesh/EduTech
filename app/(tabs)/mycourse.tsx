@@ -142,12 +142,7 @@ export default function MyCourseScreen() {
           </Text>
         }
       />
-      <CertificateCard 
-  courseName="Advanced React Native Development"
-  studentName="Your Student Name"
-  completionDate="June 15, 2025"
-  instructorName="Course Instructor"
-  />
+    
     </View>
   );
 }
