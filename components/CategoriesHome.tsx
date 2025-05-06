@@ -54,7 +54,7 @@ const Categories = () => {
           style={styles.seeAllButton}
         >
           <Text style={styles.seeAllText}>See All</Text>
-          <Ionicons name="chevron-forward" size={16} color="#7F56D9" />
+          {/* <Ionicons name="chevron-forward" size={16} color="#7F56D9" /> */}
         </TouchableOpacity>
       </View>
 
@@ -122,8 +122,7 @@ const getCategoryIcon = (category: string) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 24,
-    paddingHorizontal: 16,
+    marginTop: 20,
   },
   header: {
     flexDirection: 'row',
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#101828',
   },
