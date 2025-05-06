@@ -8,7 +8,8 @@ import {
   FlatList, 
   Image, 
   ActivityIndicator,
-  Dimensions 
+  Dimensions, 
+  Pressable
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -178,7 +179,7 @@ const TeacherDashboard = () => {
         {/* Quick Actions */}
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsContainer}>
-          <TouchableOpacity 
+          <Pressable 
             style={styles.actionButton}
             onPress={() => router.push('/(admin)/courses')} ///(admin)/create-course
           >
@@ -186,17 +187,17 @@ const TeacherDashboard = () => {
               <Ionicons name="add-circle" size={28} color="#4C51BF" />
             </View>
             <Text style={styles.actionText}>Create Course</Text>
-          </TouchableOpacity>
+          </Pressable>
           
-          <TouchableOpacity 
+          <Pressable
             style={styles.actionButton}
-            onPress={() => router.push('/(admin)/courses')} // /(admin)/upload-lecture
+            onPress={() => router.push('/(admin)/upload-lecture')}
           >
             <View style={styles.actionIcon}>
               <Ionicons name="cloud-upload" size={28} color="#4C51BF" />
             </View>
             <Text style={styles.actionText}>Upload Lecture</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Recent Students */}

@@ -11,7 +11,7 @@ const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.post('/', auth, createCourse);
+router.post('/create', auth, createCourse);
 router.get('/', getCourses);
 router.get('/:id', getCourseById);
 router.post('/enroll', auth, enrollCourse);
