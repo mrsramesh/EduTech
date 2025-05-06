@@ -1,5 +1,18 @@
 
-import { View, Text, TextInput, StyleSheet, Pressable, Image, Animated, Easing } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  StyleSheet, 
+  Pressable, 
+  Image, 
+  Animated, 
+  Easing, 
+  Dimensions, 
+  ScrollView, 
+  SafeAreaView 
+} from 'react-native';
+
 import { useRouter } from 'expo-router';
 import { useState, useRef, useEffect } from 'react';
 import API from '@/utils/api';
@@ -11,6 +24,8 @@ import { setCredentials } from '@/redux/authSlice';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign, Feather } from '@expo/vector-icons';
 
+const { width } = Dimensions.get('window');
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,12 +34,10 @@ export default function LoginScreen() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
-    // Entry animations
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -69,96 +82,103 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={['#6C63FF', '#4A42E8']}
-      style={styles.container}
-    >
-      <Animated.View 
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideUpAnim }]
-          }
-        ]}
+    <SafeAreaView style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#6C63FF', '#4A42E8']}
+        style={styles.container}
       >
-        <Image 
-          source={require('@/assets/images/icon.png')} 
-          style={styles.logo}
-        />
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
-
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <AntDesign name="mail" size={20} color="#6C63FF" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputWrapper}>
-            <AntDesign name="lock" size={20} color="#6C63FF" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#999"
-              secureTextEntry={secureText}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <Pressable 
-              onPress={() => setSecureText(!secureText)}
-              style={styles.eyeIcon}
-            >
-              <Feather 
-                name={secureText ? "eye-off" : "eye"} 
-                size={20} 
-                color="#6C63FF" 
-              />
-            </Pressable>
-          </View>
-        </View>
-
-        <Pressable 
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} 
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <Text style={styles.buttonText}>Loading...</Text>
-          ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
-          )}
-        </Pressable>
+          <Animated.View 
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideUpAnim }]
+              }
+            ]}
+          >
+            <Image 
+              source={require('@/assets/images/icon.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Sign in to continue</Text>
 
-        <View style={styles.footer}>
-          <Pressable onPress={() => router.push('/(auth)/signup')}>
-            <Text style={styles.link}>Don't have an account? <Text style={styles.linkBold}>Sign Up</Text></Text>
-          </Pressable>
-          <Pressable onPress={() => router.push('/(auth)/forgot')}>
-            <Text style={styles.link}>Forgot Password?</Text>
-          </Pressable>
-        </View>
-      </Animated.View>
-    </LinearGradient>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputWrapper}>
+                <AntDesign name="mail" size={20} color="#6C63FF" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  placeholderTextColor="#999"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <View style={styles.inputWrapper}>
+                <AntDesign name="lock" size={20} color="#6C63FF" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  placeholderTextColor="#999"
+                  secureTextEntry={secureText}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <Pressable 
+                  onPress={() => setSecureText(!secureText)}
+                  style={styles.eyeIcon}
+                >
+                  <Feather 
+                    name={secureText ? "eye-off" : "eye"} 
+                    size={20} 
+                    color="#6C63FF" 
+                  />
+                </Pressable>
+              </View>
+            </View>
+
+            <Pressable 
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Loading...' : 'Sign In'}
+              </Text>
+            </Pressable>
+
+            <View style={styles.footer}>
+              <Pressable onPress={() => router.push('/(auth)/signup')}>
+                <Text style={styles.link}>
+                  Don't have an account? <Text style={styles.linkBold}>Sign Up</Text>
+                </Text>
+              </Pressable>
+              <Pressable onPress={() => router.push('/(auth)/forgot')}>
+                <Text style={styles.link}>Forgot Password?</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </ScrollView>
+      </LinearGradient>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
   },
   content: {
-    marginHorizontal: 30,
-    padding: 25,
+    marginHorizontal: width * 0.08,
+    padding: width * 0.06,
     borderRadius: 20,
     backgroundColor: 'white',
     shadowColor: '#000',
@@ -204,16 +224,16 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 50,
+    height: 48,
     color: '#333',
-    fontSize: 16,
+    fontSize: width < 360 ? 14 : 16,
   },
   eyeIcon: {
     padding: 10,
   },
   button: {
     backgroundColor: '#6C63FF',
-    paddingVertical: 16,
+    paddingVertical: width < 360 ? 12 : 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -223,7 +243,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: width < 360 ? 14 : 16,
     fontWeight: 'bold',
   },
   footer: {

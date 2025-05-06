@@ -347,7 +347,7 @@ const TeleadApp = () => {
               }
             ]}
           >
-            <Text style={styles.logoText}>EduTach</Text>
+            <Text style={styles.logoText}>EduTech</Text>
             <Text style={styles.tagline}>Learn Without Limits</Text>
           </Animated.View>
         </Animated.View>

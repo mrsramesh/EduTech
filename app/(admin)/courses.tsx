@@ -5,10 +5,10 @@ import axios from 'axios';
 import { ADMIN_URL } from '@/constants/urls';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 export default function DashboardHome() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState(''); // ✅ new state
   const [createdBy, setCreatedBy] = useState('');
   const [token, setToken] = useState('');
   
@@ -28,32 +28,30 @@ export default function DashboardHome() {
 
   const handleCreateCourse = async () => {
     try {
-    if (!title || !description ) {
-      Toast.show({ type: 'error', text1: 'All fields are required' });
-      return;
-    }
+      if (!title || !description || !category) {
+        Toast.show({ type: 'error', text1: 'All fields are required' });
+        return;
+      }
 
-    
       const response = await axios.post(`${ADMIN_URL.CREATE_COURSE}`, {
         title,
         description,
+        category,
       },
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
+      });
 
-      console.log(response);
-
-      if(response){
+      if (response) {
         Toast.show({ type: 'success', text1: 'Course created successfully' });
         setTitle('');
         setDescription('');
+        setCategory('');
         setCreatedBy('');
       }
-      
+
     } catch (error) {
       console.error("Course creation error:", error?.response?.data || error.message || error);
       Toast.show({
@@ -72,6 +70,13 @@ export default function DashboardHome() {
         value={title}
         onChangeText={setTitle}
         placeholder="Enter course title"
+      />
+      <Text style={styles.label}>Category</Text>
+      <TextInput
+        style={styles.input}
+        value={category}
+        onChangeText={setCategory}
+        placeholder="Enter course category"
       />
       <Text style={styles.label}>Course Description</Text>
       <TextInput
@@ -96,7 +101,7 @@ export default function DashboardHome() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 10, justifyContent:"center", flex: 10},
+  container: { padding: 20, marginTop: 10, justifyContent: "center", flex: 10 },
   label: { marginTop: 10, fontWeight: 'bold' },
   input: {
     borderWidth: 1,
