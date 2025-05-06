@@ -12,7 +12,6 @@ const courseSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: true
   },
   thumbnail: {
     type: String,

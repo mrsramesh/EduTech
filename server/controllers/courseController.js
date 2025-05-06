@@ -1,5 +1,6 @@
 const Course = require("../models/Course");
-
+const multer = require('multer');
+const upload = multer();
 exports.createCourse = async (req, res) => {
   try {
 
@@ -26,7 +27,7 @@ exports.createCourse = async (req, res) => {
 
 
 
-// routes/courses.js
+
 // router.post('/:id/lectures', upload.single('video'), async (req, res) => {
 //   const { title, description } = req.body;
 //   const course = await Course.findById(req.params.id);
@@ -41,6 +42,22 @@ exports.createCourse = async (req, res) => {
 //   await course.save();
 //   res.status(200).json({ message: 'Lecture added' });
 // });
+
+exports.uploadLecture = async (req,res) => {
+  const { title, description } = req.body;
+  const course = await Course.findById(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Course not found' });
+
+  course.lectures.push({
+    title,
+    description,
+    // videoUrl: req.file?.path,
+    // or cloud URL if using Cloudinary/S3
+  });
+
+  await course.save();
+  res.status(200).json({ message: 'Lecture added' });
+}
 
 
 exports.getCourses = async (req, res) => {
