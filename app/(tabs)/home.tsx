@@ -143,9 +143,6 @@ const HomeScreen = () => {
           <CourseSection />
         </View>
       </View>
-      {/* //<Text>Welcome, {user1?.name}</Text> */}
-      <Text>Email: {user1?.email}</Text>
-      <Text>Role: {user1?.role}</Text>
     </ScrollView>
 
   );

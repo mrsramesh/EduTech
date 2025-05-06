@@ -38,7 +38,7 @@ const MyCourseScreen = () => {
   } = useQuery<Course[]>({
     queryKey: ['enrolledCourses', user?.id],
     queryFn: async () => {
-      const res = await API.get('/api/courses/user/enrolled', {
+      const res = await API.get('/api/courses/', {
         headers: { Authorization: `Bearer ${user?.token}` }
       });
       return res.data;
@@ -105,7 +105,7 @@ const MyCourseScreen = () => {
           onPress={() => setSelectedTab('enrolled')}
         >
           <Text style={[styles.tabText, selectedTab === 'enrolled' && styles.activeTabText]}>
-            Enrolled
+            All
           </Text>
         </TouchableOpacity>
         
