@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Image,
   Dimensions,
+  BackHandler 
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -23,7 +24,45 @@ import Categories from '@/components/CategoriesHome';
 import { RootState } from '@/redux/store'; // Import your store type
 import { useSelector } from 'react-redux';
 
+const router =useRouter();
+// HomeScreen कंपोनेंट के अंदर (useEffect के साथ)
+useEffect(() => {
+  const backAction = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      BackHandler.exitApp(); // ऐप बंद करें अगर कोई बैक नहीं है
+    }
+    return true; // बैक एक्शन को हैंडल कर लिया गया है
+  };
+
+  const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+  return () => backHandler.remove();
+}, [router]);
+// useEffect(() => {
+//   const checkAuthAndFetchData = async () => {
+//     const token = await AsyncStorage.getItem('token');
+//     if (!token) {
+//       router.replace('/(auth)/login'); // <-- replace का इस्तेमाल करें
+//       return;
+//     }
+
+//     try {
+//       const userResponse = await API.get('/api/auth/me', { 
+//         headers: { Authorization: `Bearer ${token}` } 
+//       });
+//       setUser(userResponse.data.data);
+//     } catch (error) {
+//       router.replace('/(auth)/login'); // टोकन इनवैलिड हो तो भी लॉगिन पर भेजें
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   checkAuthAndFetchData();
+// }, []);
 // Types
+
 type User = {
   _id: string;
   fname: string;
@@ -34,6 +73,7 @@ type User = {
 };
 
 const { width } = Dimensions.get('window');
+
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -49,7 +89,7 @@ const HomeScreen = () => {
       try {
         const token = await AsyncStorage.getItem('token');
         if (!token) {
-          router.push('/(auth)/login');
+          router.replace('/(auth)/login');
           return;
         }
 

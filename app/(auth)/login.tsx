@@ -64,9 +64,9 @@ export default function LoginScreen() {
       Toast.show({ type: 'success', text1: 'Login successful!' });
 
       if (user.role === 'teacher') {
-        router.push('/(admin)/teacherDashboard');
+        router.replace('/(admin)/teacherDashboard');
       } else {
-        router.push('/(tabs)/home');
+        router.replace('/(tabs)/home');
       }
 
     } catch (err: any) {
