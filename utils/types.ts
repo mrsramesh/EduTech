@@ -1,12 +1,15 @@
 // types.ts
 export type User = {
-    _id: string;
-    fname: string;
-    lname: string;
-    email: string;
-    role: 'student' | 'teacher';
-    profileImage?: string;
-  };
+  _id: string;
+  fname: string;
+  lname: string;
+  email: string;
+  role: 'student' | 'teacher';
+  profileImage?: string;
+
+  token?: string; // Add this if you're storing auth tokens
+  purchasedCourses?: string[]; // Add this for course purchases
+};
   
   export type Message = {
     _id: string;

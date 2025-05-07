@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -14,10 +13,14 @@ const userSchema = new mongoose.Schema({
   },
   password: { type: String, required: true },
   role: { type: String, enum: ['student', 'teacher'], default: 'student' },
-  profileImage: { type: String }
+  profileImage: { type: String },
+  purchasedCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
+  }]
 }, {
   timestamps: true,
-  collation: { locale: 'en', strength: 2 } // Case-insensitive collation
+  collation: { locale: 'en', strength: 2 }
 });
 
 // Add pre-save hook to ensure lowercase email

@@ -60,13 +60,8 @@
 
 // store/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { User } from '../utils/types'; // Adjust the path as needed
 
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  // add any other user fields you need
-}
 
 interface AuthState {
   user: User | null;

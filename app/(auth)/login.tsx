@@ -58,8 +58,8 @@ export default function LoginScreen() {
     try {
       const res = await API.post(AUTH_URL.LOGIN, { email, password });
       const { token, user } = res.data;
-
       await AsyncStorage.setItem('token', token);
+      console.log(token);
       await AsyncStorage.setItem('role', user.role);
       dispatch(setCredentials({ user, token }));
 

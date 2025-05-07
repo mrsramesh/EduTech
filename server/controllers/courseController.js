@@ -5,7 +5,7 @@ const uploadToGCS = require("../utils/gcs");
 exports.createCourse = async (req, res) => {
   try {
 
-    const { title, description, category, thumbnail } = req.body;
+    const { title, description, category, thumbnail,createdBy,price } = req.body;
 
     if (!title || !description || !category) {
       return res.status(400).json({ message: 'Required fields missing' });
@@ -16,7 +16,8 @@ exports.createCourse = async (req, res) => {
       description, 
       category,
       thumbnail,
-      createdBy: req.user.id 
+      createdBy,
+      price
     });
     
     await course.save();
@@ -26,6 +27,33 @@ exports.createCourse = async (req, res) => {
   }
 };
 
+
+exports.getEnrolledCourses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('purchasedCourses');
+    res.json(user.purchasedCourses);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+exports.getCourseById = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id)
+      .populate('createdBy', 'name email')
+      .populate('students', 'name email');
+    
+    // Check if user has purchased the course
+    const hasPurchased = req.user.purchasedCourses.includes(course._id);
+    if (!hasPurchased) {
+      return res.status(403).json({ message: 'Course not purchased' });
+    }
+
+    res.json(course);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 
 
@@ -60,9 +88,13 @@ exports.uploadLecture = async (req,res) => {
 }
 
 
+// getCourses controller
 exports.getCourses = async (req, res) => {
   try {
-    const courses = await Course.find().populate('createdBy', 'name email');
+    const courses = await Course.find()
+      .populate('createdBy', 'name email')
+      .select('title description category price createdBy'); 
+
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
