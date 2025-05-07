@@ -19,7 +19,7 @@ router.get('/', getCourses);
 router.get('/:id', getCourseById);
 router.post('/enroll', auth, enrollCourse);
 router.get('/user/enrolled', auth, getEnrolledCourses);
-router.post('/:id/lectures', auth,upload.none(), uploadLecture)
+router.post('/:id/lectures', auth,upload.single('video'), uploadLecture)
 
 
 module.exports = router;
