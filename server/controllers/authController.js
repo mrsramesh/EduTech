@@ -255,6 +255,7 @@ exports.loginUser = async (req, res) => {
       });
     }
 
+
     // Create a custom user object without password
     const userData = {
       _id: user._id,
@@ -264,7 +265,6 @@ exports.loginUser = async (req, res) => {
       role: user.role,
       profileImage: user.profileImage
     };
-
     res.json({
       success: true,
       message: 'Login successful',

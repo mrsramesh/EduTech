@@ -1,22 +1,27 @@
 import React, { createContext, useContext, useState } from 'react';
 
 type SubscriptionContextType = {
-  isSubscribed: boolean;
-  setSubscribed: (status: boolean) => void;
+  purchasedCourses: string[];
+  refreshPurchased: () => void;
 };
 
+
 const SubscriptionContext = createContext<SubscriptionContextType>({
-  isSubscribed: false,
-  setSubscribed: () => {},
+  purchasedCourses: [],
+  refreshPurchased: () => {},
 });
 
 export const useSubscription = () => useContext(SubscriptionContext);
 
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isSubscribed, setSubscribed] = useState(false);
+  const [purchasedCourses, setPurchasedCourses] = useState<string[]>([]);
+  
+  const refreshPurchased = async () => {
+    // Implement logic to refresh purchased courses from API
+  };
 
   return (
-    <SubscriptionContext.Provider value={{ isSubscribed, setSubscribed }}>
+    <SubscriptionContext.Provider value={{ purchasedCourses, refreshPurchased }}>
       {children}
     </SubscriptionContext.Provider>
   );
