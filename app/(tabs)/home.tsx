@@ -8,11 +8,14 @@ import {
   ActivityIndicator,
   Image,
   Dimensions,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from "react-native-toast-message";
+  BackHandler 
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
+
+
 
 // Components
 import SearchComponent from "@/components/common/SearchWithFilter";
@@ -23,7 +26,22 @@ import Categories from "@/components/CategoriesHome";
 import { RootState } from "@/redux/store"; // Import your store type
 import { useSelector } from "react-redux";
 
-// Types
+const router =useRouter();
+// HomeScreen कंपोनेंट के अंदर (useEffect के साथ)
+useEffect(() => {
+  const backAction = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      BackHandler.exitApp(); // ऐप बंद करें अगर कोई बैक नहीं है
+    }
+    return true; // बैक एक्शन को हैंडल कर लिया गया है
+  };
+
+  const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+  return () => backHandler.remove();
+}, [router]);
+
 type User = {
   _id: string;
   fname: string;
@@ -34,6 +52,7 @@ type User = {
 };
 
 const { width } = Dimensions.get("window");
+
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -49,7 +68,9 @@ const HomeScreen = () => {
       try {
         const token = await AsyncStorage.getItem("token");
         if (!token) {
-          router.push("/(auth)/login");
+
+          router.replace('/(auth)/login');
+
           return;
         }
 
