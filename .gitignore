@@ -32,6 +32,7 @@ yarn-error.*
 # local env files
 .env*.local
 
+\pborbit-dev-7856c1fa137d.json
 # typescript
 *.tsbuildinfo
 
