@@ -1,11 +1,14 @@
 const express = require('express');
+const multer = require('multer');
+const upload = multer();
 
 const { 
   createCourse,
   getCourses,
   getCourseById,
   enrollCourse,
-  getEnrolledCourses
+  getEnrolledCourses,
+  uploadLecture
 } = require('../controllers/courseController');
 const auth = require('../middleware/authMiddleware');
 
@@ -16,6 +19,7 @@ router.get('/', getCourses);
 router.get('/:id', getCourseById);
 router.post('/enroll', auth, enrollCourse);
 router.get('/user/enrolled', auth, getEnrolledCourses);
+router.post('/:id/lectures', auth,upload.none(), uploadLecture)
 
 
 module.exports = router;

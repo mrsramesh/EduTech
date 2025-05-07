@@ -6,6 +6,7 @@ import {
 import * as DocumentPicker from 'expo-document-picker';
 import Toast from 'react-native-toast-message';
 import API from '@/utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UploadLectureScreen = () => {
   const [courses, setCourses] = useState([]);
@@ -14,8 +15,20 @@ const UploadLectureScreen = () => {
   const [description, setDescription] = useState('');
   const [video, setVideo] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [token, setToken] = useState('');
 
   useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          setToken(token);
+        }
+      } catch (error) {
+        console.error('Failed to fetch token:', error);
+      }
+    };
+    fetchToken();
     const fetchCourses = async () => {
       try {
         const res = await API.get('/api/courses');
@@ -41,7 +54,7 @@ const UploadLectureScreen = () => {
   };
 
   const handleUpload = async () => {
-    if (!selectedCourse || !title || !description || !video) {
+    if (!selectedCourse || !title || !description ) {
       return Toast.show({
         type: 'error',
         text1: 'All fields required',
@@ -52,16 +65,16 @@ const UploadLectureScreen = () => {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    formData.append('video', {
-      uri: video.uri,
-      name: video.name,
-      type: 'video/mp4',
-    });
+    // formData.append('video', {
+    //   uri: video.uri,
+    //   name: video.name,
+    //   type: 'video/mp4',
+    // });
 
     try {
       setUploading(true);
       await API.post(`/api/courses/${selectedCourse}/lectures`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}`, },
       });
       Toast.show({
         type: 'success',
