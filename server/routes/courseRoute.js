@@ -11,7 +11,8 @@ const {
   getEnrolledCourses,
   uploadLecture,
   getAvailableCourses,
-  courseCount
+  courseCount,
+  myCourses
 } = require('../controllers/courseController');
 const protect = require('../middleware/authMiddleware');
 
@@ -23,6 +24,7 @@ router.get('/user/enrolled', protect, getEnrolledCourses);
 router.post('/:id/enroll', protect, enrollCourse);
 router.post('/:id/lectures', protect, upload.single('video'), uploadLecture);
 router.get('/user/available', protect, getAvailableCourses); // Add this new route
+router.get('/my-courses/:id', protect, myCourses );
 
 
 module.exports = router;

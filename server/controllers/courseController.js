@@ -86,17 +86,16 @@ exports.getCourseById = async (req, res) => {
 exports.uploadLecture = async (req,res) => {
   try {
 
-    console.log("In upload Lecture");
+    
     const { title, description } = req.body;
     const course = await Course.findById(req.params.id);
-    if(course){ console.log("Course :" + course)}
+    
     if (!course) return res.status(404).json({ message: 'Course not found' });
 
     let videoUrl = '';
     if (req.file) {
-      console.log("In req file");
+      
       videoUrl = await uploadToGCS(req.file);
-      console.log("Video Url :" + videoUrl);
     }
 
     course.lectures.push({
@@ -106,7 +105,7 @@ exports.uploadLecture = async (req,res) => {
     });
 
     await course.save();
-    console.log("course is saved");
+    
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({success: true, message: 'Lecture added', videoUrl });
 
@@ -199,3 +198,17 @@ exports.courseCount = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+
+exports.myCourses = async (req,res) =>{
+  try {
+    const userId = req.params.id;
+
+    const courses = await Course.find({ createdBy: userId });
+    console.log("courses : " + courses);
+    res.status(200).json(courses);
+  } catch (err) {
+    console.error('Error fetching user courses:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+}
