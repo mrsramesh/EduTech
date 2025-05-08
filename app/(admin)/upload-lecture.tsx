@@ -228,15 +228,17 @@ const UploadLectureScreen = () => {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [video, setVideo] = useState(null);
+  const [video, setVideo] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [token, setToken] = useState('');
 
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        if (token) setToken(token);
+        const storedToken = await AsyncStorage.getItem('token');
+        if (storedToken) setToken(storedToken);
+
       } catch (error) {
         console.error('Failed to fetch token:', error);
       }
@@ -267,17 +269,14 @@ const UploadLectureScreen = () => {
       type: 'video/*',
       copyToCacheDirectory: true,
     });
-  
+
     if (result.assets && result.assets.length > 0) {
-      const file = result.assets[0];
-      console.log('Picked file:', file);
-      setVideo(file);
+      setVideo(result.assets[0]);
     } else {
       console.log('No file picked or operation cancelled.');
     }
 
   };
-  
 
   const handleUpload = async () => {
 
@@ -301,17 +300,29 @@ const UploadLectureScreen = () => {
 
     try {
       setUploading(true);
+      setUploadProgress(0);
+
       await API.post(`/api/courses/${selectedCourse}/lectures`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percent);
+        },
       });
-      Toast.show({ type: 'success', text1: 'Lecture uploaded' });
+
+      Toast.show({
+        type: 'success',
+        text1: 'Lecture uploaded successfully',
+      });
       setTitle('');
       setDescription('');
       setVideo(null);
+      setUploadProgress(0);
     } catch (err: any) {
+      console.error('Upload error:', err);
       Toast.show({
         type: 'error',
         text1: 'Upload failed',
@@ -368,19 +379,27 @@ const UploadLectureScreen = () => {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleUpload} disabled={uploading}>
-        <LinearGradient
-          colors={['#667eea', '#764ba2']}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={styles.uploadButton}
-        >
-          {uploading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.uploadButtonText}>🚀 Upload Lecture</Text>
-          )}
-        </LinearGradient>
+
+      {uploading && (
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>Uploading: {uploadProgress}%</Text>
+          <View style={styles.progressBarBackground}>
+            <View style={[styles.progressBarFill, { width: `${uploadProgress}%` }]} />
+          </View>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={[styles.uploadButton, uploading && { opacity: 0.7 }]}
+        onPress={handleUpload}
+        disabled={uploading}
+      >
+        {uploading ? (
+          <ActivityIndicator color="#FFF" />
+        ) : (
+          <Text style={styles.uploadButtonText}>Upload Lecture</Text>
+        )}
+
       </TouchableOpacity>
     </ScrollView>
   );
@@ -465,6 +484,24 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  progressContainer: {
+    marginTop: 16,
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#4A5568',
+    marginBottom: 4,
+  },
+  progressBarBackground: {
+    height: 10,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: 10,
+    backgroundColor: '#4C51BF',
   },
 });
 

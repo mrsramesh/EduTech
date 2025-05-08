@@ -4,7 +4,7 @@ const API = axios.create({
   baseURL: 'http://192.168.1.4:5001', // for mobile . 
 
 
-  timeout: 10000,
+  timeout: 2100000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
