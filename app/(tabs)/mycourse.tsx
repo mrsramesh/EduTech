@@ -15,6 +15,8 @@ import CourseCard from '@/components/CourseCard';
 import SearchInput from '@/components/SearchInput';
 import API from '@/utils/api';
 import { useAuth } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
+import { selectCurrentToken, selectCurrentUser } from '@/redux/authSlice';
 import { router } from 'expo-router';
 
 interface Course {
@@ -22,45 +24,60 @@ interface Course {
   title: string;
   category: string;
   description: string;
-  price: number;       
+  price: number;
   thumbnail?: string;
   progress?: number;
   isCompleted?: boolean;
-  originalPrice?: number;
-  isPurchased?: boolean;
+  createdBy: {
+    _id: string;
+    email: string;
+    name?: string;
+  };
 }
 
+type TabType = 'enrolled' | 'available';
+
 const MyCourseScreen = () => {
-  const { user } = useAuth();
-  const [selectedTab, setSelectedTab] = useState<'enrolled' | 'completed'>('enrolled');
+  const { user: contextUser } = useAuth();
+  const reduxUser = useSelector(selectCurrentUser);
+  const reduxToken = useSelector(selectCurrentToken);
+  const user = reduxUser || contextUser;
+  const token = reduxToken || contextUser?.token;
+
+  const [selectedTab, setSelectedTab] = useState<TabType>('enrolled');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const { data: courses, isLoading, error, refetch } = useQuery<Course[]>({
-    queryKey: ['enrolledCourses', user?._id],
+    queryKey: ['courses', selectedTab, user?._id],
     queryFn: async () => {
-      const res = await API.get('/api/courses/', {
-        headers: { Authorization: `Bearer ${user?.token}` }
+      if (!token) throw new Error('Authentication required');
+      
+      const endpoint = selectedTab === 'enrolled' 
+        ? '/api/courses/user/enrolled' 
+        : '/api/courses/user/available';
+
+      const res = await API.get(endpoint, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      return res.data.map((course: Course) => ({
-        ...course,
-        isPurchased: user?.purchasedCourses?.includes(course._id) || false
-      }));
+      return res.data;
     },
-    enabled: !!user?.token
+    enabled: !!token,
   });
 
-  // Refresh data when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      refetch();
-    }, [])
+      if (token) refetch();
+    }, [token, selectedTab])
   );
 
   const handleCoursePress = (course: Course) => {
-    if (course.isPurchased) {
+    if (selectedTab === 'enrolled') {
       router.push({
         pathname: '/(tabs)/mycourse',
         params: { courseId: course._id }
@@ -72,17 +89,35 @@ const MyCourseScreen = () => {
   };
 
   const filteredCourses = courses?.filter((course) => {
-    const matchesTab = selectedTab === 'completed' ? course.isCompleted : !course.isCompleted;
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          course.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
+    return matchesSearch;
   });
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
+    try {
+      await refetch();
+    } catch (err) {
+      console.error('Refresh failed:', err);
+    } finally {
+      setRefreshing(false);
+    }
   };
+
+  if (!token) {
+    return (
+      <View style={styles.authContainer}>
+        <Text style={styles.authText}>Please sign in to view courses</Text>
+        <TouchableOpacity
+          style={styles.authButton}
+          onPress={() => router.push('/(auth)/login')}
+        >
+          <Text style={styles.authButtonText}>Sign In</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (isLoading && !refreshing) {
     return (
@@ -124,16 +159,16 @@ const MyCourseScreen = () => {
           onPress={() => setSelectedTab('enrolled')}
         >
           <Text style={[styles.tabText, selectedTab === 'enrolled' && styles.activeTabText]}>
-            All
+            Enrolled Courses
           </Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 'completed' && styles.activeTab]}
-          onPress={() => setSelectedTab('completed')}
+          style={[styles.tabButton, selectedTab === 'available' && styles.activeTab]}
+          onPress={() => setSelectedTab('available')}
         >
-          <Text style={[styles.tabText, selectedTab === 'completed' && styles.activeTabText]}>
-            Completed
+          <Text style={[styles.tabText, selectedTab === 'available' && styles.activeTabText]}>
+            Available Courses
           </Text>
         </TouchableOpacity>
       </View>
@@ -144,7 +179,7 @@ const MyCourseScreen = () => {
         renderItem={({ item }) => (
           <CourseCard 
             course={item} 
-            isLocked={!item.isPurchased}
+            isLocked={selectedTab === 'available'}
             onPress={() => handleCoursePress(item)}
           />
         )}
@@ -161,9 +196,9 @@ const MyCourseScreen = () => {
           <Text style={styles.emptyText}>
             {searchQuery 
               ? 'No courses match your search' 
-              : selectedTab === 'completed' 
-                ? 'No completed courses yet'
-                : 'No courses enrolled yet'
+              : selectedTab === 'enrolled' 
+                ? 'No enrolled courses yet'
+                : 'No available courses found'
             }
           </Text>
         }
@@ -177,17 +212,12 @@ const MyCourseScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Purchase Required</Text>
+            <Text style={styles.modalTitle}>Purchase Course</Text>
             <Text style={styles.modalText}>
-              Purchase {selectedCourse?.title} to access this course
+              You're about to purchase {selectedCourse?.title}
             </Text>
             <Text style={styles.priceText}>
               Price: ₹{selectedCourse?.price}
-              {selectedCourse?.originalPrice && (
-                <Text style={styles.originalPriceText}> 
-                  {"  "}₹{selectedCourse.originalPrice}
-                </Text>
-              )}
             </Text>
             
             <View style={styles.modalButtonContainer}>
@@ -204,11 +234,14 @@ const MyCourseScreen = () => {
                   setShowPurchaseModal(false);
                   router.push({
                     pathname: '/(payment)/PaymentScreen',
-                    params: { courseId: selectedCourse?._id }
+                    params: { 
+                      courseId: selectedCourse?._id,
+                      coursePrice: selectedCourse?.price.toString()
+                    }
                   });
                 }}
               >
-                <Text style={styles.subscribeButtonText}>Purchase Course</Text>
+                <Text style={styles.subscribeButtonText}>Confirm Purchase</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -217,13 +250,34 @@ const MyCourseScreen = () => {
     </View>
   );
 };
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
     padding: 24
+  },
+  authContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  authText: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#333'
+  },
+  authButton: {
+    backgroundColor: '#7F56D9',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8
+  },
+  authButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600'
   },
   loadingContainer: {
     flex: 1,
@@ -242,12 +296,6 @@ const styles = StyleSheet.create({
     color: '#101828',
     marginBottom: 24,
     textAlign: 'center'
-  },
-  originalPriceText: {
-    fontSize: 14,
-    color: '#667085',
-    textDecorationLine: 'line-through',
-    marginLeft: 8,
   },
   errorText: {
     color: '#F04438',
@@ -306,7 +354,6 @@ const styles = StyleSheet.create({
     color: '#98A2B3',
     fontFamily: 'Inter-Regular',
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

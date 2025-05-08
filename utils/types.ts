@@ -6,8 +6,7 @@ export type User = {
   email: string;
   role: 'student' | 'teacher';
   profileImage?: string;
-
-  token?: string; // Add this if you're storing auth tokens
+  token: string; // Add this if you're storing auth tokens
   purchasedCourses?: string[]; // Add this for course purchases
 };
   
