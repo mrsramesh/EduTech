@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Image, 
-  TouchableOpacity 
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -27,63 +27,30 @@ interface CourseCardProps {
   onPress?: () => void;
 }
 
-// ✅ HEAD version: With navigation (router.push)
-const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPress }) => {
   const router = useRouter();
 
-  return (
-    <TouchableOpacity 
-      style={styles.container}
-      onPress={() => router.push({
+  const handlePress = () => {
+    if (isLocked) {
+      router.push({
+        pathname: '/(payment)/PaymentScreen',
+        params: { courseId: course._id },
+      });
+    } else if (onPress) {
+      onPress();
+    } else {
+      router.push({
         pathname: '/(course)/[id]',
-        params: { id: course._id }
-      })}
-    >
-      <View style={styles.card}>
-        {course.thumbnail ? (
-          <Image source={{ uri: course.thumbnail }} style={styles.thumbnail} />
-        ) : (
-          <LinearGradient
-            colors={['#7F56D9', '#9E77ED']}
-            style={styles.thumbnailPlaceholder}
-          >
-            <MaterialIcons name="school" size={32} color="#FFFFFF" />
-          </LinearGradient>
-        )}
-        
-        <View style={styles.content}>
-          <Text style={styles.category}>{course.category}</Text>
-          <Text style={styles.title}>{course.title}</Text>
-          <Text style={styles.description} numberOfLines={2}>
-            {course.description}
-          </Text>
+        params: { id: course._id },
+      });
+    }
+  };
+  
 
-          {course.progress !== undefined && (
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill,
-                    { width: `${course.progress}%` }
-                  ]}
-                />
-              </View>
-              <Text style={styles.progressText}>{course.progress}% Complete</Text>
-            </View>
-          )}
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-// ❌ Commented-out alternative version (was causing merge conflict)
-/*
-const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPress }) => {
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[styles.container, isLocked && styles.lockedContainer]}
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.9}
     >
       {isLocked && (
@@ -94,19 +61,17 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
       )}
 
       {course.thumbnail ? (
-        <Image 
-          source={{ uri: course.thumbnail }} 
-          style={styles.thumbnail} 
+        <Image
+          source={{ uri: course.thumbnail }}
+          style={styles.thumbnail}
           resizeMode="cover"
         />
       ) : (
         <LinearGradient
           colors={['#7F56D9', '#9E77ED']}
           style={styles.thumbnailPlaceholder}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
         >
-          <Ionicons name="book" size={32} color="#FFFFFF" />
+          <MaterialIcons name="school" size={32} color="#FFFFFF" />
         </LinearGradient>
       )}
 
@@ -115,41 +80,35 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
           <Text style={styles.category}>{course.category}</Text>
           <Text style={styles.price}>₹{course.price}</Text>
         </View>
-        
-        <Text style={styles.title} numberOfLines={2}>{course.title}</Text>
-        <Text style={styles.description} numberOfLines={2}>{course.description}</Text>
-        
+
+        <Text style={styles.title} numberOfLines={2}>
+          {course.title}
+        </Text>
+        <Text style={styles.description} numberOfLines={2}>
+          {course.description}
+        </Text>
+
         {course.progress !== undefined && (
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View 
+              <View
                 style={[
                   styles.progressFill,
-                  { width: `${course.progress}%` }
+                  { width: `${course.progress}%` },
                 ]}
               />
             </View>
-            <Text style={styles.progressText}>{course.progress}% Complete</Text>
+            <Text style={styles.progressText}>
+              {course.progress}% Complete
+            </Text>
           </View>
         )}
       </View>
     </TouchableOpacity>
   );
 };
-*/
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  price: {
-    color: '#027A48',
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
-  },
   container: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -195,6 +154,12 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   category: {
     color: '#7F56D9',
     fontSize: 12,
@@ -202,16 +167,10 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  completedBadge: {
-    backgroundColor: '#ECFDF3',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 16,
-  },
-  completedText: {
+  price: {
     color: '#027A48',
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
   },
   title: {
     color: '#101828',
