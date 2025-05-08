@@ -62,13 +62,18 @@ exports.getCourseById = async (req, res) => {
 
 exports.uploadLecture = async (req,res) => {
   try {
+
+    console.log("In upload Lecture");
     const { title, description } = req.body;
     const course = await Course.findById(req.params.id);
+    if(course){ console.log("Course :" + course)}
     if (!course) return res.status(404).json({ message: 'Course not found' });
 
     let videoUrl = '';
     if (req.file) {
+      console.log("In req file");
       videoUrl = await uploadToGCS(req.file);
+      console.log("Video Url :" + videoUrl);
     }
 
     course.lectures.push({
@@ -78,7 +83,9 @@ exports.uploadLecture = async (req,res) => {
     });
 
     await course.save();
-    res.status(200).json({ message: 'Lecture added', videoUrl });
+    console.log("course is saved");
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({success: true, message: 'Lecture added', videoUrl });
 
   } catch (error) {
     console.error(error);

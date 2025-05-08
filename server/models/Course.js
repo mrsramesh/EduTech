@@ -35,8 +35,6 @@ const courseSchema = new mongoose.Schema({
     title: String,
     description: String,
     videoUrl: String,
-    duration: Number,
-    resources: [String]
   }]
 }, {
   timestamps: true

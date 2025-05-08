@@ -3,7 +3,7 @@ const API = axios.create({
   //baseURL: 'http://localhost:5000', // for web 
   baseURL: 'http://192.168.1.14:5001', // for mobile . 
 
-  timeout: 10000,
+  timeout: 2100000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',

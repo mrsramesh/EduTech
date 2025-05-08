@@ -1,10 +1,9 @@
 // routes/courseRoute.js
 const express = require('express');
 const router = express.Router();
-const {
 const multer = require('multer');
 const upload = multer();
-
+const {
   createCourse,
   getCourses,
   getCourseById,

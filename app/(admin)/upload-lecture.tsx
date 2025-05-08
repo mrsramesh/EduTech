@@ -1,7 +1,7 @@
 // app/(admin)/upload-lecture.tsx
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, Alert
+  View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, ScrollView
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import Toast from 'react-native-toast-message';
@@ -13,22 +13,22 @@ const UploadLectureScreen = () => {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [video, setVideo] = useState(null);
+  const [video, setVideo] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [token, setToken] = useState('');
 
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        if (token) {
-          setToken(token);
-        }
+        const storedToken = await AsyncStorage.getItem('token');
+        if (storedToken) setToken(storedToken);
       } catch (error) {
         console.error('Failed to fetch token:', error);
       }
     };
     fetchToken();
+
     const fetchCourses = async () => {
       try {
         const res = await API.get('/api/courses');
@@ -49,16 +49,13 @@ const UploadLectureScreen = () => {
       type: 'video/*',
       copyToCacheDirectory: true,
     });
-  
+
     if (result.assets && result.assets.length > 0) {
-      const file = result.assets[0];
-      console.log('Picked file:', file);
-      setVideo(file);
+      setVideo(result.assets[0]);
     } else {
       console.log('No file picked or operation cancelled.');
     }
   };
-  
 
   const handleUpload = async () => {
     if (!selectedCourse || !title || !description || !video) {
@@ -80,17 +77,31 @@ const UploadLectureScreen = () => {
 
     try {
       setUploading(true);
+      setUploadProgress(0);
+
       await API.post(`/api/courses/${selectedCourse}/lectures`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}`, },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percent);
+        },
       });
+
       Toast.show({
         type: 'success',
-        text1: 'Lecture uploaded',
+        text1: 'Lecture uploaded successfully',
       });
+
+      // Reset form
       setTitle('');
       setDescription('');
       setVideo(null);
+      setUploadProgress(0);
     } catch (err: any) {
+      console.error('Upload error:', err);
       Toast.show({
         type: 'error',
         text1: 'Upload failed',
@@ -142,7 +153,20 @@ const UploadLectureScreen = () => {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+      {uploading && (
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>Uploading: {uploadProgress}%</Text>
+          <View style={styles.progressBarBackground}>
+            <View style={[styles.progressBarFill, { width: `${uploadProgress}%` }]} />
+          </View>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={[styles.uploadButton, uploading && { opacity: 0.7 }]}
+        onPress={handleUpload}
+        disabled={uploading}
+      >
         {uploading ? (
           <ActivityIndicator color="#FFF" />
         ) : (
@@ -209,6 +233,24 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     color: 'white',
     fontWeight: '600',
+  },
+  progressContainer: {
+    marginTop: 16,
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#4A5568',
+    marginBottom: 4,
+  },
+  progressBarBackground: {
+    height: 10,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: 10,
+    backgroundColor: '#4C51BF',
   },
 });
 
