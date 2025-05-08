@@ -5,7 +5,7 @@ const upload = multer();
 const express = require('express');// your course model path
 const router = express.Router();
 
-oadToGCS = require("../utils/gcs");
+const uploadToGCS = require("../utils/gcs");
 
 exports.createCourse = async (req, res) => {
   try {
