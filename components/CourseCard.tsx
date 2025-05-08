@@ -7,7 +7,8 @@ import {
   TouchableOpacity 
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface Course {
   _id: string;
@@ -26,6 +27,58 @@ interface CourseCardProps {
   onPress?: () => void;
 }
 
+// ✅ HEAD version: With navigation (router.push)
+const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+  const router = useRouter();
+
+  return (
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={() => router.push({
+        pathname: '/(course)/[id]',
+        params: { id: course._id }
+      })}
+    >
+      <View style={styles.card}>
+        {course.thumbnail ? (
+          <Image source={{ uri: course.thumbnail }} style={styles.thumbnail} />
+        ) : (
+          <LinearGradient
+            colors={['#7F56D9', '#9E77ED']}
+            style={styles.thumbnailPlaceholder}
+          >
+            <MaterialIcons name="school" size={32} color="#FFFFFF" />
+          </LinearGradient>
+        )}
+        
+        <View style={styles.content}>
+          <Text style={styles.category}>{course.category}</Text>
+          <Text style={styles.title}>{course.title}</Text>
+          <Text style={styles.description} numberOfLines={2}>
+            {course.description}
+          </Text>
+
+          {course.progress !== undefined && (
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill,
+                    { width: `${course.progress}%` }
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressText}>{course.progress}% Complete</Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+// ❌ Commented-out alternative version (was causing merge conflict)
+/*
 const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPress }) => {
   return (
     <TouchableOpacity 
@@ -39,8 +92,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
           <Text style={styles.lockText}>Premium Content</Text>
         </View>
       )}
-      
-      {/* Course Thumbnail */}
+
       {course.thumbnail ? (
         <Image 
           source={{ uri: course.thumbnail }} 
@@ -57,8 +109,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
           <Ionicons name="book" size={32} color="#FFFFFF" />
         </LinearGradient>
       )}
-      
-      {/* Course Content */}
+
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.category}>{course.category}</Text>
@@ -68,7 +119,6 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
         <Text style={styles.title} numberOfLines={2}>{course.title}</Text>
         <Text style={styles.description} numberOfLines={2}>{course.description}</Text>
         
-        {/* Progress Bar */}
         {course.progress !== undefined && (
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
@@ -86,6 +136,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
     </TouchableOpacity>
   );
 };
+*/
 
 const styles = StyleSheet.create({
   header: {

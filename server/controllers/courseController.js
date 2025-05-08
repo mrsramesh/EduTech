@@ -1,7 +1,12 @@
 const Course = require("../models/Course");
+const User = require("../models/User")
 const multer = require('multer');
 const upload = multer();
-const uploadToGCS = require("../utils/gcs");
+const express = require('express');// your course model path
+const router = express.Router();
+
+oadToGCS = require("../utils/gcs");
+
 exports.createCourse = async (req, res) => {
   try {
 
@@ -171,3 +176,30 @@ exports.getEnrolledCourses = async (req, res) => {
   }
 };
 
+
+exports.courseCount = async (req, res) => {
+  const { email } = req.query;
+  console.log('Received email query:', email); // 👈 Use descriptive logs
+
+  try {
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const courses = await Course.find({ createdBy: user._id });
+
+    res.status(200).json({
+      email: user.email,
+      courseCount: courses.length,
+      courses,
+    });
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

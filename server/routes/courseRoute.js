@@ -11,12 +11,14 @@ const {
   enrollCourse,
   getEnrolledCourses,
   uploadLecture,
-  getAvailableCourses
+  getAvailableCourses,
+  courseCount
 } = require('../controllers/courseController');
 const protect = require('../middleware/authMiddleware');
 
 router.post('/create',protect, createCourse);
 router.get('/', getCourses);
+router.get('/info', courseCount);
 router.get('/:id', getCourseById);
 router.get('/user/enrolled', protect, getEnrolledCourses);
 router.post('/:id/enroll', protect, enrollCourse);

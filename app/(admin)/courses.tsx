@@ -4,71 +4,54 @@ import Toast from 'react-native-toast-message';
 import axios from 'axios';
 import { ADMIN_URL } from '@/constants/urls';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store';
 
 export default function DashboardHome() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState(''); // ✅ new state
   const [createdBy, setCreatedBy] = useState('');
   const [token, setToken] = useState('');
-  const userId = useSelector((state: RootState) => state.auth.user?._id);
-
+  
   useEffect(() => {
-    const fetchTokenAndUser = async () => {
+    const fetchToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token');
-        console.log(storedToken);
-        console.log("user id in create course    " + userId);
-        if (storedToken ) {
+        if (storedToken) {
           setToken(storedToken);
-          setCreatedBy(userId);
         }
       } catch (error) {
-        console.error('Failed to fetch token or userId:', error);
+        console.error('Failed to fetch token:', error);
       }
     };
-    fetchTokenAndUser();
+    fetchToken();
   }, []);
 
   const handleCreateCourse = async () => {
     try {
-      if (
-        title.trim() === '' ||
-        description.trim() === '' ||
-        category.trim() === ''
-      ) {
-        Toast.show({ type: 'error', text1: 'Title, description, and category are required' });
+      if (!title || !description || !category) {
+        Toast.show({ type: 'error', text1: 'All fields are required' });
         return;
       }
-      console.log('Token:', token);
 
-      const response = await axios.post(
-        `${ADMIN_URL.CREATE_COURSE}`,
-        {
-          title: title.trim(),
-          description: description.trim(),
-          category: category.trim(),
-          price: Number(price),
-          createdBy,
+      const response = await axios.post(`${ADMIN_URL.CREATE_COURSE}`, {
+        title,
+        description,
+        category,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
+      });
+
       if (response) {
         Toast.show({ type: 'success', text1: 'Course created successfully' });
         setTitle('');
         setDescription('');
         setCategory('');
-        setPrice('');
+        setCreatedBy('');
       }
-  
+
     } catch (error) {
       console.error("Course creation error:", error?.response?.data || error.message || error);
       Toast.show({
@@ -78,7 +61,6 @@ export default function DashboardHome() {
       });
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -89,7 +71,6 @@ export default function DashboardHome() {
         onChangeText={setTitle}
         placeholder="Enter course title"
       />
-
       <Text style={styles.label}>Category</Text>
       <TextInput
         style={styles.input}
@@ -97,16 +78,6 @@ export default function DashboardHome() {
         onChangeText={setCategory}
         placeholder="Enter course category"
       />
-
-      <Text style={styles.label}>Price</Text>
-      <TextInput
-        style={styles.input}
-        value={price}
-        onChangeText={setPrice}
-        placeholder="Enter course price"
-        keyboardType="numeric"
-      />
-
       <Text style={styles.label}>Course Description</Text>
       <TextInput
         style={[styles.input, { height: 80 }]}
@@ -115,7 +86,13 @@ export default function DashboardHome() {
         placeholder="Enter course description"
         multiline
       />
-
+      <Text style={styles.label}>Created By</Text>
+      <TextInput
+        style={styles.input}
+        value={createdBy}
+        onChangeText={setCreatedBy}
+        placeholder="Instructor name"
+      />
       <TouchableOpacity style={styles.button} onPress={handleCreateCourse}>
         <Text style={styles.buttonText}>Create Course</Text>
       </TouchableOpacity>
