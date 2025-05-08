@@ -13,21 +13,26 @@ const PaymentScreen: React.FC = () => {
   const { user: contextUser, updateUser, isLoading: authLoading } = useAuth();
   const reduxUser = useSelector((state: RootState) => state.auth.user);
   const { courseId } = useLocalSearchParams();
+
   const [checkoutHtml, setCheckoutHtml] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false); // prevent re-fetch
+  const [isPaymentVerified, setIsPaymentVerified] = useState(false); // prevent double execution
 
-  // Combine context and Redux user states
   const user = reduxUser || contextUser;
   const courseIdStr = Array.isArray(courseId) ? courseId[0] : courseId;
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (authLoading) return;
+      if (!courseIdStr || !user || authLoading || isInitialized) return;
+
+      console.log("🚀 Fetching payment order for course:", courseIdStr);
+      setIsInitialized(true); // avoid refetching
 
       try {
         const token = await AsyncStorage.getItem("token");
 
-        if (!user || !token) {
+        if (!token) {
           Alert.alert("Error", "User not authenticated");
           router.back();
           return;
@@ -77,11 +82,11 @@ const PaymentScreen: React.FC = () => {
         `;
 
         setCheckoutHtml(htmlContent);
-        setLoading(false);
       } catch (err) {
-        setLoading(false);
+        console.error("❌ Failed to fetch order:", err?.response?.data || err);
         Alert.alert("Error", "Failed to initialize payment");
-        console.error("Order fetch failed", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -89,10 +94,11 @@ const PaymentScreen: React.FC = () => {
   }, [courseIdStr, user, authLoading]);
 
   const handlePaymentResponse = async (event: any) => {
+    if (isPaymentVerified) return; // prevent double execution
+    setIsPaymentVerified(true);
+
     try {
-      if (!user) {
-        throw new Error("User not found");
-      }
+      if (!user) throw new Error("User not found");
 
       const response = JSON.parse(event.nativeEvent.data);
       const token = await AsyncStorage.getItem("token");
@@ -116,15 +122,18 @@ const PaymentScreen: React.FC = () => {
 
         await updateUser(updatedUser);
         Alert.alert("Success", "Course purchased successfully!");
-        router.replace({
-          pathname: "/(course)/[id]",
-          params: { id: courseIdStr },
-        });
+
+        setTimeout(() => {
+          router.replace({
+            pathname: "/(course)/[id]",
+            params: { id: courseIdStr },
+          });
+        }, 500); // delay to sync state
       } else {
         Alert.alert("Error", "Payment verification failed");
       }
     } catch (error) {
-      console.error("Verification error:", error);
+      console.error("❌ Payment verification error:", error);
       Alert.alert(
         "Error",
         error instanceof Error ? error.message : "Payment failed"

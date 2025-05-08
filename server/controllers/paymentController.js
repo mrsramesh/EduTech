@@ -19,19 +19,20 @@ exports.createOrder = async (req, res) => {
 
     // Validate course exists
     const course = await Course.findById(courseId);
-    console.log("Course found:", course);
-    console.log("Creating Razorpay order with amount:", course.price);
-
     if (!course) {
       return res.status(404).json({ error: "Course not found" });
     }
 
-    // Check if user already purchased the course
+    // Check enrollment using both user and course data
+    const [user, courseStudents] = await Promise.all([
+      User.findById(userId),
+      Course.findById(courseId).select('students')
+    ]);
 
-    const user = await User.findById(userId);
-    console.log("User "+user);
-
-    if (user.purchasedCourses.includes(courseId)) {
+    if (
+      user.purchasedCourses.includes(courseId) ||
+      courseStudents.students.includes(userId)
+    ) {
       return res.status(400).json({ error: "Course already purchased" });
     }
 
@@ -67,18 +68,16 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// Verify payment and enroll user in course
 exports.verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId } = req.body;
     const userId = req.user.id;
 
-    // Validate IDs
+    // Add validation
     if (!mongoose.Types.ObjectId.isValid(courseId)) {
       return res.status(400).json({ error: "Invalid course ID" });
     }
 
-    // Verify signature
     const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSign = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -93,57 +92,56 @@ exports.verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid signature" });
     }
 
-    // Check if course exists
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ error: "Course not found" });
-    }
-
     // Update payment record
-    const payment = await Payment.findOneAndUpdate(
-      { orderId: razorpay_order_id },
-      {
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature,
-        status: "success",
-      },
-      { new: true }
-    );
-
-    // Update user and course
-    const [updatedUser] = await Promise.all([
-      User.findByIdAndUpdate(
-        userId,
-        { $addToSet: { purchasedCourses: courseId } },
-        { new: true }
-      ).select('-password'),
-      Course.findByIdAndUpdate(
-        courseId,
-        { $addToSet: { students: userId } },
-        { new: true }
-      )
-    ]);
-
-    res.status(200).json({
-      success: true,
-      message: "Payment verified and course enrolled",
-      user: updatedUser,
-      payment
-    });
-
-  } catch (error) {
-    console.error("Payment verification error:", error);
     await Payment.findOneAndUpdate(
       { orderId: razorpay_order_id },
-      { status: "failed" }
+      {
+        status: 'paid',
+        paymentId: razorpay_payment_id,
+      }
     );
-    res.status(500).json({
-      success: false,
-      error: "Payment verification failed",
-      message: error.message,
-    });
+
+    // Add transaction to sync user and course data
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Update user's purchasedCourses
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { $addToSet: { purchasedCourses: courseId } },
+        { new: true, session }
+      );
+
+      // Update course's students
+      const course = await Course.findByIdAndUpdate(
+        courseId,
+        { $addToSet: { students: userId } },
+        { new: true, session }
+      );
+
+      if (!user || !course) {
+        await session.abortTransaction();
+        return res.status(404).json({ error: "User or Course not found" });
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({ success: true });
+
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
+
+  } catch (error) {
+    console.error("Error verifying payment:", error);
+    res.status(500).json({ success: false, message: "Payment verification failed" });
   }
 };
+
 
 // Get user's payment history
 exports.getPaymentHistory = async (req, res) => {

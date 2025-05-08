@@ -7,7 +7,7 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Modal
+  Modal,
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
@@ -54,16 +54,14 @@ const MyCourseScreen = () => {
     queryKey: ['courses', selectedTab, user?._id],
     queryFn: async () => {
       if (!token) throw new Error('Authentication required');
-      
-      const endpoint = selectedTab === 'enrolled' 
-        ? '/api/courses/user/enrolled' 
+      const endpoint = selectedTab === 'enrolled'
+        ? '/api/courses/user/enrolled'
         : '/api/courses/user/available';
-
       const res = await API.get(endpoint, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
       return res.data;
     },
@@ -80,7 +78,7 @@ const MyCourseScreen = () => {
     if (selectedTab === 'enrolled') {
       router.push({
         pathname: '/(tabs)/mycourse',
-        params: { courseId: course._id }
+        params: { courseId: course._id },
       });
     } else {
       setSelectedCourse(course);
@@ -89,9 +87,11 @@ const MyCourseScreen = () => {
   };
 
   const filteredCourses = courses?.filter((course) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         course.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+    const query = searchQuery.toLowerCase();
+    return (
+      course.title.toLowerCase().includes(query) ||
+      course.category.toLowerCase().includes(query)
+    );
   });
 
   const onRefresh = async () => {
@@ -104,20 +104,6 @@ const MyCourseScreen = () => {
       setRefreshing(false);
     }
   };
-
-  if (!token) {
-    return (
-      <View style={styles.authContainer}>
-        <Text style={styles.authText}>Please sign in to view courses</Text>
-        <TouchableOpacity
-          style={styles.authButton}
-          onPress={() => router.push('/(auth)/login')}
-        >
-          <Text style={styles.authButtonText}>Sign In</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   if (isLoading && !refreshing) {
     return (
@@ -133,10 +119,7 @@ const MyCourseScreen = () => {
         <Text style={styles.errorText}>
           Error loading courses: {error.message}
         </Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={() => refetch()}
-        >
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -162,7 +145,7 @@ const MyCourseScreen = () => {
             Enrolled Courses
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 'available' && styles.activeTab]}
           onPress={() => setSelectedTab('available')}
@@ -177,8 +160,8 @@ const MyCourseScreen = () => {
         data={filteredCourses}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <CourseCard 
-            course={item} 
+          <CourseCard
+            course={item}
             isLocked={selectedTab === 'available'}
             onPress={() => handleCoursePress(item)}
           />
@@ -194,19 +177,18 @@ const MyCourseScreen = () => {
         }
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            {searchQuery 
-              ? 'No courses match your search' 
-              : selectedTab === 'enrolled' 
-                ? 'No enrolled courses yet'
-                : 'No available courses found'
-            }
+            {searchQuery
+              ? 'No courses match your search'
+              : selectedTab === 'enrolled'
+              ? 'No enrolled courses yet'
+              : 'No available courses found'}
           </Text>
         }
       />
 
       <Modal
         visible={showPurchaseModal}
-        transparent={true}
+        transparent
         animationType="fade"
         onRequestClose={() => setShowPurchaseModal(false)}
       >
@@ -219,25 +201,25 @@ const MyCourseScreen = () => {
             <Text style={styles.priceText}>
               Price: ₹{selectedCourse?.price}
             </Text>
-            
+
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowPurchaseModal(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[styles.modalButton, styles.subscribeButton]}
                 onPress={() => {
                   setShowPurchaseModal(false);
                   router.push({
                     pathname: '/(payment)/PaymentScreen',
-                    params: { 
+                    params: {
                       courseId: selectedCourse?._id,
-                      coursePrice: selectedCourse?.price.toString()
-                    }
+                      coursePrice: selectedCourse?.price.toString(),
+                    },
                   });
                 }}
               >
@@ -250,76 +232,46 @@ const MyCourseScreen = () => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-    padding: 24
-  },
-  authContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20
-  },
-  authText: {
-    fontSize: 18,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#333'
-  },
-  authButton: {
-    backgroundColor: '#7F56D9',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8
-  },
-  authButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600'
+    padding: 24,
+    marginTop:28
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
-  },
-  priceText: {
-    fontSize: 18,
-    fontFamily: 'Inter-Bold',
-    color: '#101828',
-    marginBottom: 24,
-    textAlign: 'center'
+    padding: 20,
   },
   errorText: {
     color: '#F04438',
     fontSize: 16,
-    fontFamily: 'Inter-Regular',
     marginBottom: 16,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   retryButton: {
     backgroundColor: '#7F56D9',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 8
+    borderRadius: 8,
   },
   retryButtonText: {
     color: '#FFFFFF',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14
+    fontSize: 14,
   },
   header: {
     fontSize: 24,
-    fontFamily: 'Inter-Bold',
+    fontWeight: '700',
     color: '#101828',
-    marginBottom: 16
+    marginBottom: 16,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -339,7 +291,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
     color: '#667085',
   },
   activeTabText: {
@@ -352,61 +304,67 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 32,
     color: '#98A2B3',
-    fontFamily: 'Inter-Regular',
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 24,
-    width: '80%',
+    width: '100%',
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 20,
-    fontFamily: 'Inter-Bold',
+    fontWeight: '700',
+    marginBottom: 8,
     color: '#101828',
-    marginBottom: 12,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   modalText: {
     fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#667085',
+    color: '#344054',
+    textAlign: 'center',
     marginBottom: 16,
-    textAlign: 'center'
+  },
+  priceText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#101828',
+    marginBottom: 24,
+    textAlign: 'center',
   },
   modalButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    width: '100%',
   },
   modalButton: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+    marginHorizontal: 8,
   },
   cancelButton: {
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#E4E7EC',
+  },
+  cancelButtonText: {
+    color: '#344054',
+    fontWeight: '600',
   },
   subscribeButton: {
     backgroundColor: '#7F56D9',
   },
-  cancelButtonText: {
-    color: '#344054',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14
-  },
   subscribeButtonText: {
-    color: 'white',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14
-  }
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
 });
 
 export default MyCourseScreen;
