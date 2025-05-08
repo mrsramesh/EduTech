@@ -7,6 +7,11 @@ import * as DocumentPicker from 'expo-document-picker';
 import Toast from 'react-native-toast-message';
 import API from '@/utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from 'expo-router';
+
+import { BackHandler } from 'react-native';
+import { useRouter } from 'expo-router';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const UploadLectureScreen = () => {
   const [courses, setCourses] = useState([]);
@@ -17,6 +22,19 @@ const UploadLectureScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [token, setToken] = useState('');
+ const router = useRouter();
+
+  useFocusEffect(() => {
+    const onBackPress = () => {
+      router.replace('/(admin)/teacherDashboard');
+      return true;
+    };
+  
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  
+    return () =>
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+  });
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -114,7 +132,11 @@ const UploadLectureScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>Upload Lecture</Text>
+      <Text style={styles.heading}>
+      <TouchableOpacity onPress={() => router.replace('/(admin)/teacherDashboard')}>
+  <Icon name="arrow-back" size={24} color="#4C51BF" />
+</TouchableOpacity>
+        Upload Lecture</Text>
 
       <Text style={styles.label}>Select Course</Text>
       {courses.map((course: any) => (
@@ -188,7 +210,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     color: '#2D3748',
-    marginBottom: 24,
+    marginBottom: 34,
   },
   label: {
     fontSize: 14,

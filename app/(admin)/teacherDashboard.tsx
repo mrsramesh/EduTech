@@ -18,6 +18,8 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import API from '@/utils/api';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useNavigation } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
+import { BackHandler } from 'react-native';
 
 // Define types
 type Student = {
@@ -58,6 +60,18 @@ const TeacherDashboard = () => {
     totalEarnings: 0,
   });
 
+  useFocusEffect(() => {
+    const onBackPress = () => {
+      // prevent going back
+      return true;
+    };
+  
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  
+    return () =>
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+  });
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -181,7 +195,7 @@ const TeacherDashboard = () => {
         <View style={styles.actionsContainer}>
           <Pressable 
             style={styles.actionButton}
-            onPress={() => router.push('/(admin)/courses')} ///(admin)/create-course
+            onPress={() => router.replace('/(admin)/courses')} ///(admin)/create-course
           >
             <View style={styles.actionIcon}>
               <Ionicons name="add-circle" size={28} color="#4C51BF" />
