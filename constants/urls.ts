@@ -1,4 +1,4 @@
-const BASE_URL =   'http://192.168.3.136:5001/api'//'http://localhost:5000/api';
+const BASE_URL =   'http://192.168.168.136:5001/api'//'http://localhost:5000/api';
 
 
 export const  AUTH_URL = {

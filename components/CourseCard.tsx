@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter ,useLocalSearchParams } from 'expo-router';
 
 interface Course {
   _id: string;
@@ -16,10 +17,21 @@ interface CourseCardProps {
   course: Course;
 }
 
+// Add navigation to your existing CourseCard component
+const router = useRouter();
 
 const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   return (
-    <TouchableOpacity style={styles.container}>
+    // <TouchableOpacity style={styles.container}
+    // onPress={() => router.push(`/(course)/${course._id}`)}
+    // >
+    <TouchableOpacity 
+    style={styles.container}
+    onPress={() => router.push({
+      pathname: '/(course)/[id]',
+      params: { id: course._id }
+    })}
+  >
       <View style={styles.card}>
         {course.thumbnail ? (
           <Image source={{ uri: course.thumbnail }} style={styles.thumbnail} />
@@ -37,6 +49,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
           <Text style={styles.title}>{course.title}</Text>
           <Text style={styles.description} numberOfLines={2}>
             {course.description}
+          
           </Text>
           
           {course.progress !== undefined && (

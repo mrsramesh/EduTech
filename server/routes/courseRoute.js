@@ -8,7 +8,8 @@ const {
   getCourseById,
   enrollCourse,
   getEnrolledCourses,
-  uploadLecture
+  uploadLecture,
+  courseCount
 } = require('../controllers/courseController');
 const auth = require('../middleware/authMiddleware');
 
@@ -16,6 +17,7 @@ const router = express.Router();
 
 router.post('/create', auth, createCourse);
 router.get('/', getCourses);
+router.get('/info', courseCount);
 router.get('/:id', getCourseById);
 router.post('/enroll', auth, enrollCourse);
 router.get('/user/enrolled', auth, getEnrolledCourses);

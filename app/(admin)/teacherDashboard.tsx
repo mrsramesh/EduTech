@@ -104,7 +104,7 @@ const TeacherDashboard = () => {
   const renderCourseItem = ({ item }: { item: Course }) => (
     <TouchableOpacity 
       style={styles.courseCard}
-      onPress={() => router.push(`/(admin)/courses`)} //(admin)/courses/${item.id}
+     // onPress={() => router.push(`/(admin)/courses`)} //(admin)/courses/${item.id}
     >
       <View style={styles.courseIcon}>
         <Ionicons name="book" size={24} color="#4C51BF" />
