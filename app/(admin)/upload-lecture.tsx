@@ -8,6 +8,9 @@ import Toast from 'react-native-toast-message';
 import API from '@/utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { store } from '../../redux/store';
+import { tokens } from 'react-native-paper/lib/typescript/styles/themes/v3/tokens';
+
 const UploadLectureScreen = () => {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -17,34 +20,50 @@ const UploadLectureScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [token, setToken] = useState('');
-
+  const currentUser = store.getState().auth.user;
+  //console.log(currentUser);
   useEffect(() => {
     const fetchToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token');
+        console.log("stored token" + storedToken)
         if (storedToken) setToken(storedToken);
       } catch (error) {
         console.error('Failed to fetch token:', error);
       }
     };
     fetchToken();
-
-    const fetchCourses = async () => {
+    
+    
+    const fetchUserCourses = async () => {
       try {
-        const res = await API.get('/api/courses');
+        //console.log("current user :" + currentUser._id)
+        console.log("this is real token :" + token)
+        const res = await API.get(`/api/courses/my-courses/${currentUser._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'Error',
+          text2: 'Course fetched successfully',
+        });
         setCourses(res.data || []);
       } catch (err) {
+        console.log("Error fetching user courses:", err.response?.data || err.message);
         Toast.show({
           type: 'error',
           text1: 'Error',
-          text2: 'Could not fetch courses',
+          text2: 'Could not fetch your courses',
         });
       }
     };
-    fetchCourses();
-  }, []);
+    fetchUserCourses();
+  }, [token]);
 
   const handlePickVideo = async () => {
+    console.log("User is this:  " +  user)
     const result = await DocumentPicker.getDocumentAsync({
       type: 'video/*',
       copyToCacheDirectory: true,
