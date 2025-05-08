@@ -7,6 +7,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 
+import { useRouter } from 'expo-router';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 export default function DashboardHome() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -15,7 +20,24 @@ export default function DashboardHome() {
   const [createdBy, setCreatedBy] = useState('');
   const [token, setToken] = useState('');
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const router = useRouter();
 
+  //  back navigation handle
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        router.replace('/(admin)/teacherDashboard'); // or router.push if you prefer
+        return true;
+      };
+  
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      };
+    }, [])
+  );
+  
   useEffect(() => {
     const fetchTokenAndUser = async () => {
       try {
@@ -82,6 +104,11 @@ export default function DashboardHome() {
 
   return (
     <View style={styles.container}>
+      {/* back Navigation */}
+      <TouchableOpacity onPress={() => router.replace('/(admin)/teacherDashboard')}>
+  <Icon name="arrow-back" size={24} color="#4C51BF" />
+</TouchableOpacity>
+
       <Text style={styles.label}>Course Name</Text>
       <TextInput
         style={styles.input}
