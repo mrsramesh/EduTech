@@ -6,43 +6,38 @@ import { useAuth } from '../context/AuthContext';
 import { router, useLocalSearchParams } from 'expo-router';
 import { AUTH_URL } from '@/constants/urls';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store'; // adjust path
+import { RootState } from '@/redux/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User } from '@/utils/types';
 
 const PaymentScreen: React.FC = () => {
-  const { user, updateUser } = useAuth();
+  const { user: contextUser, updateUser, isLoading: authLoading } = useAuth();
+  const reduxUser = useSelector((state: RootState) => state.auth.user);
   const { courseId } = useLocalSearchParams();
   const [checkoutHtml, setCheckoutHtml] = useState('');
   const [loading, setLoading] = useState(true);
-  const userId = useSelector((state: RootState) => state.auth.user?._id);
-  const [storeToken, setStoreToken]=useState("");
+  
+  // Combine context and Redux user states
+  const user = reduxUser || contextUser;
   const courseIdStr = Array.isArray(courseId) ? courseId[0] : courseId;
 
   useEffect(() => {
     const fetchOrder = async () => {
+      if (authLoading) return;
+
       try {
         const token = await AsyncStorage.getItem('token');
-        if (!token) {
+        
+        if (!user || !token) {
           Alert.alert('Error', 'User not authenticated');
+          router.back();
           return;
         }
-        console.log("course id in payment screen "+courseIdStr);
-        console.log("token in payment screen "+token);
-        console.log("userid in payment screen "+userId);
 
         const { data } = await axios.post(
           AUTH_URL.PAYMENT,
-          {
-            courseId: courseIdStr,
-            userId: userId
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
+          { courseId: courseIdStr, userId: user._id },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        
-
 
         const options = {
           key: 'rzp_test_Kf8fzScnGfUBMN',
@@ -52,15 +47,12 @@ const PaymentScreen: React.FC = () => {
           description: 'Course Purchase',
           order_id: data.id,
           prefill: {
-            name: `${user?.fname} ${user?.lname}`,
-            email: user?.email,
+            name: `${user.fname} ${user.lname}`,
+            email: user.email,
             contact: '9999999999'
           },
           theme: { color: '#7F56D9' },
-          notes: {
-            courseId:courseIdStr,
-            userId: userId
-          }
+          notes: { courseId: courseIdStr, userId: user._id }
         };
 
         const htmlContent = `
@@ -94,13 +86,17 @@ const PaymentScreen: React.FC = () => {
     };
 
     fetchOrder();
-  }, [courseId, user]);
+  }, [courseIdStr, user, authLoading]);
 
   const handlePaymentResponse = async (event: any) => {
     try {
+      if (!user) {
+        throw new Error('User not found');
+      }
+
       const response = JSON.parse(event.nativeEvent.data);
       const token = await AsyncStorage.getItem('token');
-  
+
       const verification = await axios.post(
         AUTH_URL.VERIFY_PAYMENT,
         {
@@ -109,37 +105,28 @@ const PaymentScreen: React.FC = () => {
           razorpay_signature: response.razorpay_signature,
           courseId: courseIdStr,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-  
-      if (verification.data.success && user && user._id && user.fname && user.lname && user.email && user.role) {
-        const updatedUser: User = {
-          _id: user._id,
-          fname: user.fname,
-          lname: user.lname,
-          email: user.email,
-          role: user.role,
-          profileImage: user.profileImage,
-          token: user.token,
+
+      if (verification.data.success) {
+        const updatedUser = {
+          ...user,
           purchasedCourses: [...(user.purchasedCourses || []), courseIdStr]
         };
-  
-        updateUser(updatedUser);
+
+        await updateUser(updatedUser);
         Alert.alert('Success', 'Course purchased successfully!');
         router.back();
       } else {
-        Alert.alert('Error', 'User information is incomplete or payment verification failed.');
+        Alert.alert('Error', 'Payment verification failed');
       }
     } catch (error) {
       console.error('Verification error:', error);
-      Alert.alert('Error', 'Payment verification failed');
+      Alert.alert('Error', error instanceof Error ? error.message : 'Payment failed');
     }
   };
-  
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <ActivityIndicator size="large" color="#7F56D9" />
