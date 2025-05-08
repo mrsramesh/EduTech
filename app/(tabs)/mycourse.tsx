@@ -6,22 +6,28 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
+  Modal
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect } from 'expo-router';
 import CourseCard from '@/components/CourseCard';
 import SearchInput from '@/components/SearchInput';
 import API from '@/utils/api';
 import { useAuth } from '../context/AuthContext';
+import { router } from 'expo-router';
 
 interface Course {
   _id: string;
   title: string;
   category: string;
   description: string;
+  price: number;       
   thumbnail?: string;
   progress?: number;
   isCompleted?: boolean;
+  originalPrice?: number;
+  isPurchased?: boolean;
 }
 
 const MyCourseScreen = () => {
@@ -29,21 +35,47 @@ const MyCourseScreen = () => {
   const [selectedTab, setSelectedTab] = useState<'enrolled' | 'completed'>('enrolled');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
-  const { 
-    data: courses, 
-    isLoading, 
-    error,
-    refetch 
-  } = useQuery<Course[]>({
-    queryKey: ['enrolledCourses', user?.id],
+  const { data: courses, isLoading, error, refetch } = useQuery<Course[]>({
+    queryKey: ['enrolledCourses', user?._id],
     queryFn: async () => {
       const res = await API.get('/api/courses/', {
         headers: { Authorization: `Bearer ${user?.token}` }
       });
-      return res.data;
+      return res.data.map((course: Course) => ({
+        ...course,
+        isPurchased: user?.purchasedCourses?.includes(course._id) || false
+      }));
     },
-    enabled: !!user?.token // Only fetch if user is authenticated
+    enabled: !!user?.token
+  });
+
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [])
+  );
+
+  const handleCoursePress = (course: Course) => {
+    if (course.isPurchased) {
+      router.push({
+        pathname: '/(tabs)/mycourse',
+        params: { courseId: course._id }
+      });
+    } else {
+      setSelectedCourse(course);
+      setShowPurchaseModal(true);
+    }
+  };
+
+  const filteredCourses = courses?.filter((course) => {
+    const matchesTab = selectedTab === 'completed' ? course.isCompleted : !course.isCompleted;
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         course.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTab && matchesSearch;
   });
 
   const onRefresh = async () => {
@@ -51,19 +83,6 @@ const MyCourseScreen = () => {
     await refetch();
     setRefreshing(false);
   };
-
-  const filteredCourses = courses?.filter((course) => {
-    // Filter by tab selection
-    const matchesTab = selectedTab === 'completed' 
-      ? course.isCompleted 
-      : !course.isCompleted;
-    
-    // Filter by search query
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         course.category.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesTab && matchesSearch;
-  });
 
   if (isLoading && !refreshing) {
     return (
@@ -79,7 +98,7 @@ const MyCourseScreen = () => {
         <Text style={styles.errorText}>
           Error loading courses: {error.message}
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.retryButton}
           onPress={() => refetch()}
         >
@@ -92,7 +111,7 @@ const MyCourseScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>My Courses</Text>
-      
+
       <SearchInput
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -122,7 +141,13 @@ const MyCourseScreen = () => {
       <FlatList
         data={filteredCourses}
         keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <CourseCard course={item} />}
+        renderItem={({ item }) => (
+          <CourseCard 
+            course={item} 
+            isLocked={!item.isPurchased}
+            onPress={() => handleCoursePress(item)}
+          />
+        )}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -143,9 +168,56 @@ const MyCourseScreen = () => {
           </Text>
         }
       />
+
+      <Modal
+        visible={showPurchaseModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowPurchaseModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Purchase Required</Text>
+            <Text style={styles.modalText}>
+              Purchase {selectedCourse?.title} to access this course
+            </Text>
+            <Text style={styles.priceText}>
+              Price: ₹{selectedCourse?.price}
+              {selectedCourse?.originalPrice && (
+                <Text style={styles.originalPriceText}> 
+                  {"  "}₹{selectedCourse.originalPrice}
+                </Text>
+              )}
+            </Text>
+            
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowPurchaseModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.subscribeButton]}
+                onPress={() => {
+                  setShowPurchaseModal(false);
+                  router.push({
+                    pathname: '/(payment)/PaymentScreen',
+                    params: { courseId: selectedCourse?._id }
+                  });
+                }}
+              >
+                <Text style={styles.subscribeButtonText}>Purchase Course</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -163,6 +235,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20
+  },
+  priceText: {
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    color: '#101828',
+    marginBottom: 24,
+    textAlign: 'center'
+  },
+  originalPriceText: {
+    fontSize: 14,
+    color: '#667085',
+    textDecorationLine: 'line-through',
+    marginLeft: 8,
   },
   errorText: {
     color: '#F04438',
@@ -221,6 +306,60 @@ const styles = StyleSheet.create({
     color: '#98A2B3',
     fontFamily: 'Inter-Regular',
   },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#101828',
+    marginBottom: 12,
+    textAlign: 'center'
+  },
+  modalText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#667085',
+    marginBottom: 16,
+    textAlign: 'center'
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#F2F4F7',
+  },
+  subscribeButton: {
+    backgroundColor: '#7F56D9',
+  },
+  cancelButtonText: {
+    color: '#344054',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 14
+  },
+  subscribeButtonText: {
+    color: 'white',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 14
+  }
 });
 
 export default MyCourseScreen;

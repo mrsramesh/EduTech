@@ -259,12 +259,30 @@ const UploadLectureScreen = () => {
   }, []);
 
   const handlePickVideo = async () => {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'video/*' });
-    if (result.type === 'success') setVideo(result);
+
+    // const result = await DocumentPicker.getDocumentAsync({ type: 'video/*' });
+    // if (result.type === 'success') setVideo(result);
+
+    const result = await DocumentPicker.getDocumentAsync({
+      type: 'video/*',
+      copyToCacheDirectory: true,
+    });
+  
+    if (result.assets && result.assets.length > 0) {
+      const file = result.assets[0];
+      console.log('Picked file:', file);
+      setVideo(file);
+    } else {
+      console.log('No file picked or operation cancelled.');
+    }
+
   };
+  
 
   const handleUpload = async () => {
-    if (!selectedCourse || !title || !description) {
+
+    if (!selectedCourse || !title || !description || !video) {
+
       return Toast.show({
         type: 'error',
         text1: 'All fields required',
@@ -275,11 +293,11 @@ const UploadLectureScreen = () => {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    // formData.append('video', {
-    //   uri: video.uri,
-    //   name: video.name,
-    //   type: 'video/mp4',
-    // });
+    formData.append('video', {
+      uri: video.uri,
+      name: video.name || 'video.mp4',
+      type: video.mimeType || 'video/mp4',
+    });
 
     try {
       setUploading(true);
