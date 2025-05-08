@@ -33,15 +33,44 @@ exports.createCourse = async (req, res) => {
 };
 
 
-exports.getEnrolledCourses = async (req, res) => {
+exports.enrollCourse = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('purchasedCourses');
-    res.json(user.purchasedCourses);
+    const user = await User.findById(req.user.id);
+    const course = await Course.findById(req.params.id);
+    
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    // Add to user's purchasedCourses
+    if (!user.purchasedCourses.includes(course._id)) {
+      user.purchasedCourses.push(course._id);
+      await user.save();
+    }
+
+    // Add to course's students
+    if (!course.students.includes(user._id)) {
+      course.students.push(user._id);
+      await course.save();
+    }
+
+    res.json(course);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+exports.getAvailableCourses = async (req, res) => {
+  try {
+    // Get courses not purchased by user
+    const courses = await Course.find({ 
+      students: { $nin: [req.user.id] }
+    })
+    .populate('createdBy', 'name email')
+    .select('title description category price createdBy thumbnail');
 
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 exports.getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
