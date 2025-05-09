@@ -38,8 +38,6 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
         pathname: '/(payment)/PaymentScreen',
         params: { courseId: course._id },
       });
-    } else if (onPress) {
-      onPress();
     } else {
       router.push({
         pathname: '/(course)/[id]',

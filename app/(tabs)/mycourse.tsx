@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   RefreshControl,
   Modal,
-  TextInput
+  TextInput,
+  GestureResponderEvent,
+
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
@@ -38,6 +40,15 @@ interface Course {
 
 type TabType = 'enrolled' | 'available';
 
+type CourseRouteParams = {
+  id: string;
+};
+
+type PaymentRouteParams = {
+  courseId: string;
+  coursePrice: string;
+};
+
 const MyCourseScreen = () => {
   const { user: contextUser } = useAuth();
   const reduxUser = useSelector(selectCurrentUser);
@@ -55,7 +66,12 @@ const [selectedCourseForQuery, setSelectedCourseForQuery] = useState<Course | nu
 const [showQueryModal, setShowQueryModal] = useState(false);
 const [queryText, setQueryText] = useState('');
 
-  const { data: courses, isLoading, error, refetch } = useQuery<Course[]>({
+  const { 
+    data: courses, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery<Course[]>({
     queryKey: ['courses', selectedTab, user?._id],
     queryFn: async () => {
       if (!token) throw new Error('Authentication required');
@@ -82,8 +98,8 @@ const [queryText, setQueryText] = useState('');
   const handleCoursePress = (course: Course) => {
     if (selectedTab === 'enrolled') {
       router.push({
-        pathname: '/(tabs)/mycourse',
-        params: { courseId: course._id },
+        pathname: '/(course)/[id]',
+        params: { id: course._id } as CourseRouteParams,
       });
     } else {
       setSelectedCourse(course);
@@ -91,28 +107,9 @@ const [queryText, setQueryText] = useState('');
     }
   };
 
+
   // handler fx of query meassage 
-  // const handleQuerySubmit = async () => {
-  //   try {
-  //     if (!token || !selectedCourseForQuery || !queryText.trim()) return;
-      
-  //     await API.post('/api/queries', {
-  //       courseId: selectedCourseForQuery._id,
-  //       message: queryText.trim(),
-  //     }, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  
-  //     setShowQueryModal(false);
-  //     setQueryText('');
-  //     alert('Query submitted successfully!');
-  //   } catch (error) {
-  //     console.error('Query submission failed:', error);
-  //     alert('Failed to submit query. Please try again.');
-  //   }
-  // };
+ 
   const handleQuerySubmit = async () => {
     try {
       if (!token || !selectedCourseForQuery || !queryText.trim() || !user?._id) return;
@@ -142,6 +139,12 @@ const [queryText, setQueryText] = useState('');
       console.error('Query submission failed:', error);
       alert('Failed to submit query. Please try again.');
     }
+  }
+
+  const handleRetryPress = (e: GestureResponderEvent) => {
+    e.preventDefault();
+    refetch();
+
   };
 
   const filteredCourses = courses?.filter((course) => {
@@ -177,7 +180,13 @@ const [queryText, setQueryText] = useState('');
         <Text style={styles.errorText}>
           Error loading courses: {error.message}
         </Text>
-        <TouchableOpacity style={styles.retryButton}  onPress={() => refetch()}>
+
+       {/* // <TouchableOpacity style={styles.retryButton}  onPress={() => refetch()}> */}
+
+        <TouchableOpacity 
+          style={styles.retryButton} 
+          onPress={handleRetryPress}
+        >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -281,9 +290,9 @@ const [queryText, setQueryText] = useState('');
                   router.push({
                     pathname: '/(payment)/PaymentScreen',
                     params: {
-                      courseId: selectedCourse?._id,
-                      coursePrice: selectedCourse?.price.toString(),
-                    },
+                      courseId: selectedCourse?._id || '',
+                      coursePrice: selectedCourse?.price.toString() || '0',
+                    } as PaymentRouteParams,
                   });
                 }}
               >
@@ -346,7 +355,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
     padding: 24,
-    marginTop:28
+    marginTop: 28
   },
   loadingContainer: {
     flex: 1,
