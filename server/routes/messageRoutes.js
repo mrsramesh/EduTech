@@ -1,8 +1,9 @@
-const express = require('express');
+ const express = require('express');
 const router = express.Router();
-const messageController = require('../controllers/messageController');
+const  {queryMessage, getQuery }= require('../controllers/messageController');
 
-router.post('/', messageController.sendMessage);
-router.get('/:roomId', messageController.getMessages);
+
+router.post('/send', queryMessage);
+router.get('/teacher/:teacherId',getQuery);
 
 module.exports = router;

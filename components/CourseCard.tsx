@@ -25,9 +25,11 @@ interface CourseCardProps {
   course: Course;
   isLocked?: boolean;
   onPress?: () => void;
+  // for message 
+  onQueryPress?: () => void;
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPress }) => {
+const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPress ,onQueryPress }) => {
   const router = useRouter();
 
   const handlePress = () => {
@@ -59,7 +61,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
           <Text style={styles.lockText}>Premium Content</Text>
         </View>
       )}
-
+      
       {course.thumbnail ? (
         <Image
           source={{ uri: course.thumbnail }}
@@ -103,7 +105,23 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isLocked = false, onPre
             </Text>
           </View>
         )}
+
+              {/* query message  handle  */}
+      
+      {!isLocked && (
+  <View style={styles.buttonContainer}>
+    <TouchableOpacity
+      style={styles.queryButton}
+      onPress={onQueryPress}
+    >
+      <Text style={styles.queryButtonText}>Send Query</Text>
+    </TouchableOpacity>
+  </View>
+       )}
+
+
       </View>
+
     </TouchableOpacity>
   );
 };
@@ -204,6 +222,36 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-Medium',
     marginTop: 4,
+  },
+  //  query message style 
+
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 0,
+  },
+  queryButton: {
+    backgroundColor: '#EDE9FE',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  queryButtonText: {
+    color: '#7C3AED',
+    marginLeft: 8,
+    fontFamily: 'Inter-SemiBold',
+  },
+  enrolledBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  enrolledText: {
+    color: '#22C55E',
+    fontFamily: 'Inter-SemiBold',
   },
 });
 

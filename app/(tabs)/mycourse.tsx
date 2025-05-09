@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Modal,
+  TextInput
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
@@ -49,6 +50,10 @@ const MyCourseScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+//  for message handling
+const [selectedCourseForQuery, setSelectedCourseForQuery] = useState<Course | null>(null);
+const [showQueryModal, setShowQueryModal] = useState(false);
+const [queryText, setQueryText] = useState('');
 
   const { data: courses, isLoading, error, refetch } = useQuery<Course[]>({
     queryKey: ['courses', selectedTab, user?._id],
@@ -86,6 +91,59 @@ const MyCourseScreen = () => {
     }
   };
 
+  // handler fx of query meassage 
+  // const handleQuerySubmit = async () => {
+  //   try {
+  //     if (!token || !selectedCourseForQuery || !queryText.trim()) return;
+      
+  //     await API.post('/api/queries', {
+  //       courseId: selectedCourseForQuery._id,
+  //       message: queryText.trim(),
+  //     }, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  
+  //     setShowQueryModal(false);
+  //     setQueryText('');
+  //     alert('Query submitted successfully!');
+  //   } catch (error) {
+  //     console.error('Query submission failed:', error);
+  //     alert('Failed to submit query. Please try again.');
+  //   }
+  // };
+  const handleQuerySubmit = async () => {
+    try {
+      if (!token || !selectedCourseForQuery || !queryText.trim() || !user?._id) return;
+      console.log("enter in handle fx .");
+      
+      const requestBody = {
+        courseId: selectedCourseForQuery._id,
+        message: queryText.trim(),
+        studentId: user._id, // Student ID जोड़ें
+        teacherId: selectedCourseForQuery.createdBy._id, // Teacher ID जोड़ें
+        courseTitle: selectedCourseForQuery.title // Optional: Course title
+       
+   
+      };
+      console.log("Request Body:", requestBody);
+      await API.post('/api/queries/send', requestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json' // Content-Type header जोड़ें
+        },
+      });
+  
+      setShowQueryModal(false);
+      setQueryText('');
+      alert('Query submitted successfully!');
+    } catch (error) {
+      console.error('Query submission failed:', error);
+      alert('Failed to submit query. Please try again.');
+    }
+  };
+
   const filteredCourses = courses?.filter((course) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -119,7 +177,7 @@ const MyCourseScreen = () => {
         <Text style={styles.errorText}>
           Error loading courses: {error.message}
         </Text>
-        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+        <TouchableOpacity style={styles.retryButton}  onPress={() => refetch()}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -130,12 +188,13 @@ const MyCourseScreen = () => {
     <View style={styles.container}>
       <Text style={styles.header}>My Courses</Text>
 
+    {/* Header, Search और Tabs का code */}
       <SearchInput
         value={searchQuery}
         onChangeText={setSearchQuery}
         placeholder="Search courses..."
       />
-
+  {/* tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 'enrolled' && styles.activeTab]}
@@ -164,6 +223,11 @@ const MyCourseScreen = () => {
             course={item}
             isLocked={selectedTab === 'available'}
             onPress={() => handleCoursePress(item)}
+            //  for message handleing 
+            onQueryPress={() => {
+              setSelectedCourseForQuery(item);
+              setShowQueryModal(true);
+            }}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -185,7 +249,7 @@ const MyCourseScreen = () => {
           </Text>
         }
       />
-
+ {/* Purchase Course Modal */}
       <Modal
         visible={showPurchaseModal}
         transparent
@@ -229,6 +293,50 @@ const MyCourseScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/*  query message model*/}
+      <Modal
+      visible={showQueryModal}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowQueryModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Ask Question</Text>
+          <Text style={styles.courseName}>{selectedCourseForQuery?.title}</Text>
+          
+          <TextInput
+            style={styles.queryInput}
+            multiline
+            numberOfLines={4}
+            placeholder="Type your question here..."
+            value={queryText}
+            onChangeText={setQueryText}
+          />
+
+          <View style={styles.modalButtonContainer}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => setShowQueryModal(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalButton, styles.subscribeButton]}
+              onPress={handleQuerySubmit}
+              disabled={!queryText.trim()}
+            >
+              <Text style={styles.subscribeButtonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </View>
+    </Modal>
+
+      
     </View>
   );
 };
@@ -365,6 +473,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
   },
+  // query message style 
+  queryInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 16,
+    textAlignVertical: 'top',
+    minHeight: 120,
+    fontSize: 14,
+    color: '#374151',
+  },
+  courseName: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+
 });
 
 export default MyCourseScreen;
