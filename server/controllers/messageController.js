@@ -31,7 +31,8 @@ exports.getQuery = async (req, res) => {
       studentName: `${item.student.fname} ${item.student.lname}`,
       message: item.message,
       courseId: item.course._id,
-      courseTitle: item.course.title
+      courseTitle: item.course.title,
+      studentEmail:item.student.email
     }));
 
     res.status(200).json(filteredData);
