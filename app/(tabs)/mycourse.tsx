@@ -10,9 +10,8 @@ import {
   Modal,
   TextInput,
   GestureResponderEvent,
-
 } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
 import CourseCard from '@/components/CourseCard';
 import SearchInput from '@/components/SearchInput';
@@ -21,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSelector } from 'react-redux';
 import { selectCurrentToken, selectCurrentUser } from '@/redux/authSlice';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Course {
   _id: string;
@@ -50,21 +50,20 @@ type PaymentRouteParams = {
 };
 
 const MyCourseScreen = () => {
+  const queryClient = useQueryClient();
   const { user: contextUser } = useAuth();
   const reduxUser = useSelector(selectCurrentUser);
   const reduxToken = useSelector(selectCurrentToken);
   const user = reduxUser || contextUser;
-  const token = reduxToken || contextUser?.token;
 
   const [selectedTab, setSelectedTab] = useState<TabType>('enrolled');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-//  for message handling
-const [selectedCourseForQuery, setSelectedCourseForQuery] = useState<Course | null>(null);
-const [showQueryModal, setShowQueryModal] = useState(false);
-const [queryText, setQueryText] = useState('');
+  const [selectedCourseForQuery, setSelectedCourseForQuery] = useState<Course | null>(null);
+  const [showQueryModal, setShowQueryModal] = useState(false);
+  const [queryText, setQueryText] = useState('');
 
   const { 
     data: courses, 
@@ -74,10 +73,13 @@ const [queryText, setQueryText] = useState('');
   } = useQuery<Course[]>({
     queryKey: ['courses', selectedTab, user?._id],
     queryFn: async () => {
+      const token = await AsyncStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
+      
       const endpoint = selectedTab === 'enrolled'
         ? '/api/courses/user/enrolled'
         : '/api/courses/user/available';
+        
       const res = await API.get(endpoint, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -86,13 +88,13 @@ const [queryText, setQueryText] = useState('');
       });
       return res.data;
     },
-    enabled: !!token,
+    enabled: !!user?._id,
   });
 
   useFocusEffect(
     React.useCallback(() => {
-      if (token) refetch();
-    }, [token, selectedTab])
+      refetch();
+    }, [selectedTab])
   );
 
   const handleCoursePress = (course: Course) => {
@@ -107,28 +109,23 @@ const [queryText, setQueryText] = useState('');
     }
   };
 
-
-  // handler fx of query meassage 
- 
   const handleQuerySubmit = async () => {
     try {
+      const token = await AsyncStorage.getItem('token');
       if (!token || !selectedCourseForQuery || !queryText.trim() || !user?._id) return;
-      console.log("enter in handle fx .");
       
       const requestBody = {
         courseId: selectedCourseForQuery._id,
         message: queryText.trim(),
-        studentId: user._id, // Student ID जोड़ें
-        teacherId: selectedCourseForQuery.createdBy._id, // Teacher ID जोड़ें
-        courseTitle: selectedCourseForQuery.title // Optional: Course title
-       
-   
+        studentId: user._id,
+        teacherId: selectedCourseForQuery.createdBy._id,
+        courseTitle: selectedCourseForQuery.title
       };
-      console.log("Request Body:", requestBody);
+      
       await API.post('/api/queries/send', requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json' // Content-Type header जोड़ें
+          'Content-Type': 'application/json'
         },
       });
   
@@ -144,7 +141,6 @@ const [queryText, setQueryText] = useState('');
   const handleRetryPress = (e: GestureResponderEvent) => {
     e.preventDefault();
     refetch();
-
   };
 
   const filteredCourses = courses?.filter((course) => {
@@ -180,9 +176,6 @@ const [queryText, setQueryText] = useState('');
         <Text style={styles.errorText}>
           Error loading courses: {error.message}
         </Text>
-
-       {/* // <TouchableOpacity style={styles.retryButton}  onPress={() => refetch()}> */}
-
         <TouchableOpacity 
           style={styles.retryButton} 
           onPress={handleRetryPress}
@@ -197,13 +190,12 @@ const [queryText, setQueryText] = useState('');
     <View style={styles.container}>
       <Text style={styles.header}>My Courses</Text>
 
-    {/* Header, Search और Tabs का code */}
       <SearchInput
         value={searchQuery}
         onChangeText={setSearchQuery}
         placeholder="Search courses..."
       />
-  {/* tabs */}
+
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 'enrolled' && styles.activeTab]}
@@ -232,7 +224,6 @@ const [queryText, setQueryText] = useState('');
             course={item}
             isLocked={selectedTab === 'available'}
             onPress={() => handleCoursePress(item)}
-            //  for message handleing 
             onQueryPress={() => {
               setSelectedCourseForQuery(item);
               setShowQueryModal(true);
@@ -258,7 +249,7 @@ const [queryText, setQueryText] = useState('');
           </Text>
         }
       />
- {/* Purchase Course Modal */}
+
       <Modal
         visible={showPurchaseModal}
         transparent
@@ -303,53 +294,48 @@ const [queryText, setQueryText] = useState('');
         </View>
       </Modal>
 
-      {/*  query message model*/}
       <Modal
-      visible={showQueryModal}
-      transparent
-      animationType="fade"
-      onRequestClose={() => setShowQueryModal(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Ask Question</Text>
-          <Text style={styles.courseName}>{selectedCourseForQuery?.title}</Text>
-          
-          <TextInput
-            style={styles.queryInput}
-            multiline
-            numberOfLines={4}
-            placeholder="Type your question here..."
-            value={queryText}
-            onChangeText={setQueryText}
-          />
+        visible={showQueryModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowQueryModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Send Query</Text>
+            <Text style={styles.courseName}>{selectedCourseForQuery?.title}</Text>
+            
+            <TextInput
+              style={styles.queryInput}
+              multiline
+              numberOfLines={4}
+              placeholder="Type your query here..."
+              value={queryText}
+              onChangeText={setQueryText}
+            />
 
-          <View style={styles.modalButtonContainer}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setShowQueryModal(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowQueryModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.modalButton, styles.subscribeButton]}
-              onPress={handleQuerySubmit}
-              disabled={!queryText.trim()}
-            >
-              <Text style={styles.subscribeButtonText}>Submit</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.subscribeButton]}
+                onPress={handleQuerySubmit}
+                disabled={!queryText.trim()}
+              >
+                <Text style={styles.subscribeButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
         </View>
-      </View>
-    </Modal>
-
-      
+      </Modal>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
