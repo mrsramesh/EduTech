@@ -3,9 +3,13 @@ import { Drawer } from 'expo-router/drawer';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'; // Added StyleSheet import
 import { Ionicons } from '@expo/vector-icons';
 import {useRouter} from 'expo-router';
-
+import { store } from '../../redux/store';
+import { CurrentRenderContext } from '@react-navigation/native';
 export default function DashboardLayout() {
   const router = useRouter();
+  const currentUser = store.getState().auth.user;
+    console.log(currentUser);
+  
   return (
     <Drawer
       screenOptions={{
@@ -24,8 +28,8 @@ export default function DashboardLayout() {
             <View style={styles.profileImage}>
               <Ionicons name="person" size={40} color="#4C51BF" />
             </View>
-            <Text style={styles.profileName}>Mr. Sharma</Text>
-            <Text style={styles.profileEmail}>teacher@example.com</Text>
+            <Text style={styles.profileName}>{currentUser?.fname} {currentUser?.lname}</Text>
+            <Text style={styles.profileEmail}>{currentUser?.email}</Text>
           </View>
 
           {/* Drawer Items */}

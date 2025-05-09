@@ -1,27 +1,31 @@
+
+
+
+
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  FlatList, 
-  Image, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+  Image,
   ActivityIndicator,
-  Dimensions, 
-  Pressable
+  Dimensions,
+  Pressable,
+  BackHandler,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import API from '@/utils/api';
 import { DrawerToggleButton } from '@react-navigation/drawer';
-import { useNavigation } from 'expo-router';
-import { useFocusEffect } from 'expo-router';
-import { BackHandler } from 'react-native';
+import { useNavigation, useFocusEffect } from 'expo-router';
+import { store } from '../../redux/store';
 
-// Define types
+const { width } = Dimensions.get('window');
+
 type Student = {
   _id: string;
   fname: string;
@@ -43,17 +47,15 @@ type Stats = {
   totalEarnings: number;
 };
 
-const { width } = Dimensions.get('window');
-
 const TeacherDashboard = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const currentUser = store.getState().auth.user;
+  const token = store.getState().auth.token;
+
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [students, setStudents] = useState<Student[]>([]);
-  const [courses, setCourses] = useState<Course[]>([
-    { id: '1', title: 'Mathematics 101', students: 24, lectures: 12 },
-    { id: '2', title: 'Physics Fundamentals', students: 18, lectures: 8 },
-  ]);
   const [stats, setStats] = useState<Stats>({
     totalStudents: 0,
     activeCourses: 0,
@@ -61,35 +63,45 @@ const TeacherDashboard = () => {
   });
 
   useFocusEffect(() => {
-    const onBackPress = () => {
-      // prevent going back
-      return true;
-    };
-  
+    const onBackPress = () => true;
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
-  
-    return () =>
-      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
   });
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [studentsRes] = await Promise.all([
-          API.get('/api/auth/students'),
+        const [coursesRes, studentsRes] = await Promise.all([
+          API.get(`/api/courses/my-courses/${currentUser._id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          API.get('/api/auth/students', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
 
-        setStudents(studentsRes.data || []);
+        const fetchedCourses = coursesRes.data || [];
+        const fetchedStudents = studentsRes.data || [];
+
+        setCourses(fetchedCourses);
+        setStudents(fetchedStudents);
+
         setStats({
-          totalStudents: studentsRes.data?.length || 0,
-          activeCourses: courses.length,
-          totalEarnings: 1250,
+          totalStudents: fetchedStudents.length || 0,
+          activeCourses: fetchedCourses.length || 0,
+          totalEarnings: 1250, // Static for now
+        });
+
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Dashboard data loaded',
         });
       } catch (error: any) {
         Toast.show({
           type: 'error',
           text1: 'Error',
-          text2: error.response?.data?.message || 'Failed to load data',
+          text2: error.response?.data?.message || 'Failed to load dashboard data',
         });
       } finally {
         setLoading(false);
@@ -106,7 +118,8 @@ const TeacherDashboard = () => {
       ) : (
         <View style={[styles.studentAvatar, styles.avatarPlaceholder]}>
           <Text style={styles.avatarText}>
-            {item.fname?.[0]}{item.lname?.[0]}
+            {item.fname?.[0]}
+            {item.lname?.[0]}
           </Text>
         </View>
       )}
@@ -116,29 +129,28 @@ const TeacherDashboard = () => {
   );
 
   const renderCourseItem = ({ item }: { item: Course }) => (
-    <TouchableOpacity 
-      style={styles.courseCard}
-     // onPress={() => router.push(`/(admin)/courses`)} //(admin)/courses/${item.id}
-    >
-      <View style={styles.courseIcon}>
-        <Ionicons name="book" size={24} color="#4C51BF" />
-      </View>
-      <View style={styles.courseInfo}>
-        <Text style={styles.courseTitle}>{item.title}</Text>
-        <View style={styles.courseStats}>
-          <View style={styles.courseStat}>
-            <Ionicons name="people" size={16} color="#718096" />
-            <Text style={styles.courseStatText}>{item.students} students</Text>
-          </View>
-          <View style={styles.courseStat}>
-            <Ionicons name="videocam" size={16} color="#718096" />
-            <Text style={styles.courseStatText}>{item.lectures} lectures</Text>
-          </View>
+  <TouchableOpacity style={styles.courseCard}>
+    <Image
+      source={{ uri: item.thumbnail || 'https://via.placeholder.com/100' }}
+      style={styles.courseThumbnail}
+    />
+    <View style={styles.courseInfo}>
+      <Text style={styles.courseTitle}>{item.title}</Text>
+      <View style={styles.courseStats}>
+        <View style={styles.courseStat}>
+          <Ionicons name="people" size={16} color="#718096" />
+          <Text style={styles.courseStatText}>{item.students?.length || 0} students</Text>
+        </View>
+        <View style={styles.courseStat}>
+          <Ionicons name="videocam" size={16} color="#718096" />
+          <Text style={styles.courseStatText}>{item.lectures?.length || 0} lectures</Text>
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#A0AEC0" />
-    </TouchableOpacity>
-  );
+    </View>
+    <Ionicons name="chevron-forward" size={20} color="#A0AEC0" />
+  </TouchableOpacity>
+);
+
 
   if (loading) {
     return (
@@ -151,19 +163,16 @@ const TeacherDashboard = () => {
 
   return (
     <View style={styles.mainContainer}>
-      {/* Header with Drawer Toggle */}
       <View style={styles.header}>
         <DrawerToggleButton tintColor="#4C51BF" />
         <Text style={styles.headerTitle}>Teacher Dashboard</Text>
       </View>
 
-      {/* Content */}
-      <ScrollView 
-        style={styles.container} 
+      <ScrollView
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={[styles.statCard, { backgroundColor: '#EEF2FF' }]}>
             <View style={[styles.statIcon, { backgroundColor: '#4C51BF' }]}>
@@ -172,7 +181,7 @@ const TeacherDashboard = () => {
             <Text style={styles.statValue}>{stats.totalStudents}</Text>
             <Text style={styles.statLabel}>Students</Text>
           </View>
-          
+
           <View style={[styles.statCard, { backgroundColor: '#F0FFF4' }]}>
             <View style={[styles.statIcon, { backgroundColor: '#38A169' }]}>
               <Ionicons name="book" size={20} color="white" />
@@ -180,7 +189,7 @@ const TeacherDashboard = () => {
             <Text style={styles.statValue}>{stats.activeCourses}</Text>
             <Text style={styles.statLabel}>Courses</Text>
           </View>
-          
+
           <View style={[styles.statCard, { backgroundColor: '#FFF5F5' }]}>
             <View style={[styles.statIcon, { backgroundColor: '#E53E3E' }]}>
               <MaterialIcons name="attach-money" size={20} color="white" />
@@ -190,23 +199,16 @@ const TeacherDashboard = () => {
           </View>
         </View>
 
-        {/* Quick Actions */}
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsContainer}>
-          <Pressable 
-            style={styles.actionButton}
-            onPress={() => router.replace('/(admin)/courses')} ///(admin)/create-course
-          >
+          <Pressable style={styles.actionButton} onPress={() => router.replace('/(admin)/courses')}>
             <View style={styles.actionIcon}>
               <Ionicons name="add-circle" size={28} color="#4C51BF" />
             </View>
             <Text style={styles.actionText}>Create Course</Text>
           </Pressable>
-          
-          <Pressable
-            style={styles.actionButton}
-            onPress={() => router.push('/(admin)/upload-lecture')}
-          >
+
+          <Pressable style={styles.actionButton} onPress={() => router.push('/(admin)/upload-lecture')}>
             <View style={styles.actionIcon}>
               <Ionicons name="cloud-upload" size={28} color="#4C51BF" />
             </View>
@@ -214,7 +216,6 @@ const TeacherDashboard = () => {
           </Pressable>
         </View>
 
-        {/* Recent Students */}
         <Text style={styles.sectionTitle}>Recent Students</Text>
         <FlatList
           horizontal
@@ -225,7 +226,6 @@ const TeacherDashboard = () => {
           showsHorizontalScrollIndicator={false}
         />
 
-        {/* Your Courses */}
         <Text style={styles.sectionTitle}>Your Courses</Text>
         <FlatList
           data={courses}
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#EDF2F7',
-    paddingTop: 50, // For status bar
+    paddingTop: 50,
   },
   headerTitle: {
     fontSize: 20,
@@ -332,71 +332,57 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   actionText: {
-    color: '#4C51BF',
+    fontSize: 14,
     fontWeight: '500',
-    textAlign: 'center',
-  },
-  listContent: {
-    paddingBottom: 16,
+    color: '#2D3748',
   },
   studentCard: {
-    width: 160,
+    width: 120,
+    marginRight: 16,
+    alignItems: 'center',
+    padding: 8,
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
-    marginRight: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 2,
   },
   studentAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginBottom: 12,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 8,
   },
   avatarPlaceholder: {
-    backgroundColor: '#4C51BF',
+    backgroundColor: '#CBD5E0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
     color: 'white',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   studentName: {
     fontWeight: '600',
     color: '#2D3748',
-    marginBottom: 4,
   },
   studentEmail: {
     fontSize: 12,
     color: '#718096',
   },
+  listContent: {
+    paddingBottom: 16,
+  },
   courseCard: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: 16,
     elevation: 2,
   },
   courseIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E9D8FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   courseInfo: {
     flex: 1,
@@ -404,15 +390,15 @@ const styles = StyleSheet.create({
   courseTitle: {
     fontWeight: '600',
     color: '#2D3748',
-    marginBottom: 8,
   },
   courseStats: {
     flexDirection: 'row',
+    marginTop: 4,
   },
   courseStat: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   courseStatText: {
     fontSize: 12,

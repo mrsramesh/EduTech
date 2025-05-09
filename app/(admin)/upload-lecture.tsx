@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { store } from '../../redux/store';
-import { tokens } from 'react-native-paper/lib/typescript/styles/themes/v3/tokens';
+
 
 const UploadLectureScreen = () => {
   const [courses, setCourses] = useState([]);
@@ -24,10 +24,10 @@ const UploadLectureScreen = () => {
   const [video, setVideo] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [token, setToken] = useState('');
-
+  
+  const token = store.getState().auth.token;
   const currentUser = store.getState().auth.user;
-  //console.log(currentUser);
+  console.log(currentUser);
 
  const router = useRouter();
 
@@ -43,22 +43,22 @@ const UploadLectureScreen = () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
   });
   useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem('token');
-        console.log("stored token" + storedToken)
-        if (storedToken) setToken(storedToken);
-      } catch (error) {
-        console.error('Failed to fetch token:', error);
-      }
-    };
-    fetchToken();
+    // const fetchToken = async () => {
+    //   try {
+    //     const storedToken = await AsyncStorage.getItem('token');
+    //     console.log("stored token" + storedToken)
+    //     if (storedToken) setToken(storedToken);
+    //   } catch (error) {
+    //     console.error('Failed to fetch token:', error);
+    //   }
+    // };
+    // fetchToken();
     
     
     const fetchUserCourses = async () => {
       try {
         //console.log("current user :" + currentUser._id)
-        console.log("this is real token :" + token)
+        console.log("this is upload lecture token :" + token)
         const res = await API.get(`/api/courses/my-courses/${currentUser._id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
