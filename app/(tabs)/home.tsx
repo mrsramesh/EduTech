@@ -8,14 +8,12 @@ import {
   ActivityIndicator,
   Image,
   Dimensions,
-  BackHandler 
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
-
-
+  BackHandler,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 // Components
 import SearchComponent from "@/components/common/SearchWithFilter";
@@ -23,24 +21,6 @@ import CourseSection from "@/components/CourseSection";
 import API from "@/utils/api";
 import DiscountCard from "@/components/DiscountCard";
 import Categories from "@/components/CategoriesHome";
-import { RootState } from "@/redux/store"; // Import your store type
-import { useSelector } from "react-redux";
-
-const router =useRouter();
-// HomeScreen कंपोनेंट के अंदर (useEffect के साथ)
-useEffect(() => {
-  const backAction = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      BackHandler.exitApp(); // ऐप बंद करें अगर कोई बैक नहीं है
-    }
-    return true; // बैक एक्शन को हैंडल कर लिया गया है
-  };
-
-  const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-  return () => backHandler.remove();
-}, [router]);
 
 type User = {
   _id: string;
@@ -53,24 +33,17 @@ type User = {
 
 const { width } = Dimensions.get("window");
 
-
 const HomeScreen = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  // Access specific data from Redux store
-  const user1 = useSelector((state: RootState) => state.auth.user);
-  const token = useSelector((state: RootState) => state.auth.token);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
         if (!token) {
-
-          router.replace('/(auth)/login');
-
+          router.replace("/(auth)/login");
           return;
         }
 
@@ -92,6 +65,23 @@ const HomeScreen = () => {
     };
 
     fetchUserData();
+
+    // Handle Android back button
+    const backAction = () => {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        BackHandler.exitApp();
+      }
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
   }, []);
 
   if (loading) {
@@ -115,7 +105,7 @@ const HomeScreen = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header Section */}
+      {/* Header */}
       <LinearGradient
         colors={["#7F56D9", "#9E77ED"]}
         start={{ x: 0, y: 0 }}
@@ -139,7 +129,7 @@ const HomeScreen = () => {
         </View>
       </LinearGradient>
 
-      {/* Main Content */}
+      {/* Content */}
       <View style={styles.content}>
         {/* <SearchComponent /> */}
 
@@ -149,7 +139,6 @@ const HomeScreen = () => {
         </View>
 
         <View style={styles.section}>
-          {/* <Text style={styles.sectionTitle}>Explore Categories</Text> */}
           <Categories />
         </View>
 

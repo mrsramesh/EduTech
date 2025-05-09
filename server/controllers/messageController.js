@@ -1,34 +1,47 @@
-const Message = require('../models/Message');
+const Query = require('../models/Message');
 
-exports.sendMessage = async (req, res) => {
+exports.queryMessage = async (req, res) => {
   try {
-    const { roomId, senderId, receiverId, message, file } = req.body;
-    
-    const newMessage = new Message({
-      roomId,
-      senderId,
-      receiverId,
+    const { courseId, message, studentId, teacherId } = req.body;
+    console.log("Request body received:", req.body);
+    const newQuery = new Query({
+      course: courseId,
       message,
-      file: file || null,
-      status: 'sent'
+      student: studentId,
+      teacher: teacherId,
+      status: 'pending'
     });
 
-    const savedMessage = await newMessage.save();
-    res.status(201).json(savedMessage);
+    await newQuery.save();
+    res.status(201).json(newQuery);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
-exports.getMessages = async (req, res) => {
+exports.getQuery = async (req, res) => {
   try {
-    const { roomId } = req.params;
-    const messages = await Message.find({ roomId })
-      .sort({ createdAt: -1 })
-      .limit(50);
-      
-    res.json(messages.reverse());
+    console.log("[inside query . get]");
+    
+    const queries = await Query.find()
+      .populate('course student teacher');
+
+    const filteredData = queries.map((item) => ({
+      studentId: item.student._id,
+      studentName: `${item.student.fname} ${item.student.lname}`,
+      message: item.message,
+      courseId: item.course._id,
+      courseTitle: item.course.title,
+      studentEmail:item.student.email
+    }));
+
+    res.status(200).json(filteredData);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("GET error:", error);
+    res.status(500).json([{ error: 'Server error' }]);
   }
 };
+
+// for all response . 
+// const queries =  await Query.find().populate('course student teacher');
+// res.status(200).json(queries);

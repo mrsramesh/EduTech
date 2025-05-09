@@ -7,7 +7,10 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Modal
+  Modal,
+  TextInput,
+  GestureResponderEvent,
+
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
@@ -37,6 +40,15 @@ interface Course {
 
 type TabType = 'enrolled' | 'available';
 
+type CourseRouteParams = {
+  id: string;
+};
+
+type PaymentRouteParams = {
+  courseId: string;
+  coursePrice: string;
+};
+
 const MyCourseScreen = () => {
   const { user: contextUser } = useAuth();
   const reduxUser = useSelector(selectCurrentUser);
@@ -49,21 +61,28 @@ const MyCourseScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+//  for message handling
+const [selectedCourseForQuery, setSelectedCourseForQuery] = useState<Course | null>(null);
+const [showQueryModal, setShowQueryModal] = useState(false);
+const [queryText, setQueryText] = useState('');
 
-  const { data: courses, isLoading, error, refetch } = useQuery<Course[]>({
+  const { 
+    data: courses, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery<Course[]>({
     queryKey: ['courses', selectedTab, user?._id],
     queryFn: async () => {
       if (!token) throw new Error('Authentication required');
-      
-      const endpoint = selectedTab === 'enrolled' 
-        ? '/api/courses/user/enrolled' 
+      const endpoint = selectedTab === 'enrolled'
+        ? '/api/courses/user/enrolled'
         : '/api/courses/user/available';
-
       const res = await API.get(endpoint, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
       return res.data;
     },
@@ -79,8 +98,8 @@ const MyCourseScreen = () => {
   const handleCoursePress = (course: Course) => {
     if (selectedTab === 'enrolled') {
       router.push({
-        pathname: '/(tabs)/mycourse',
-        params: { courseId: course._id }
+        pathname: '/(course)/[id]',
+        params: { id: course._id } as CourseRouteParams,
       });
     } else {
       setSelectedCourse(course);
@@ -88,10 +107,52 @@ const MyCourseScreen = () => {
     }
   };
 
+
+  // handler fx of query meassage 
+ 
+  const handleQuerySubmit = async () => {
+    try {
+      if (!token || !selectedCourseForQuery || !queryText.trim() || !user?._id) return;
+      console.log("enter in handle fx .");
+      
+      const requestBody = {
+        courseId: selectedCourseForQuery._id,
+        message: queryText.trim(),
+        studentId: user._id, // Student ID जोड़ें
+        teacherId: selectedCourseForQuery.createdBy._id, // Teacher ID जोड़ें
+        courseTitle: selectedCourseForQuery.title // Optional: Course title
+       
+   
+      };
+      console.log("Request Body:", requestBody);
+      await API.post('/api/queries/send', requestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json' // Content-Type header जोड़ें
+        },
+      });
+  
+      setShowQueryModal(false);
+      setQueryText('');
+      alert('Query submitted successfully!');
+    } catch (error) {
+      console.error('Query submission failed:', error);
+      alert('Failed to submit query. Please try again.');
+    }
+  }
+
+  const handleRetryPress = (e: GestureResponderEvent) => {
+    e.preventDefault();
+    refetch();
+
+  };
+
   const filteredCourses = courses?.filter((course) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         course.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+    const query = searchQuery.toLowerCase();
+    return (
+      course.title.toLowerCase().includes(query) ||
+      course.category.toLowerCase().includes(query)
+    );
   });
 
   const onRefresh = async () => {
@@ -104,20 +165,6 @@ const MyCourseScreen = () => {
       setRefreshing(false);
     }
   };
-
-  if (!token) {
-    return (
-      <View style={styles.authContainer}>
-        <Text style={styles.authText}>Please sign in to view courses</Text>
-        <TouchableOpacity
-          style={styles.authButton}
-          onPress={() => router.push('/(auth)/login')}
-        >
-          <Text style={styles.authButtonText}>Sign In</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   if (isLoading && !refreshing) {
     return (
@@ -133,9 +180,12 @@ const MyCourseScreen = () => {
         <Text style={styles.errorText}>
           Error loading courses: {error.message}
         </Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={() => refetch()}
+
+       {/* // <TouchableOpacity style={styles.retryButton}  onPress={() => refetch()}> */}
+
+        <TouchableOpacity 
+          style={styles.retryButton} 
+          onPress={handleRetryPress}
         >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
@@ -147,12 +197,13 @@ const MyCourseScreen = () => {
     <View style={styles.container}>
       <Text style={styles.header}>My Courses</Text>
 
+    {/* Header, Search और Tabs का code */}
       <SearchInput
         value={searchQuery}
         onChangeText={setSearchQuery}
         placeholder="Search courses..."
       />
-
+  {/* tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 'enrolled' && styles.activeTab]}
@@ -162,7 +213,7 @@ const MyCourseScreen = () => {
             Enrolled Courses
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 'available' && styles.activeTab]}
           onPress={() => setSelectedTab('available')}
@@ -177,10 +228,15 @@ const MyCourseScreen = () => {
         data={filteredCourses}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <CourseCard 
-            course={item} 
+          <CourseCard
+            course={item}
             isLocked={selectedTab === 'available'}
             onPress={() => handleCoursePress(item)}
+            //  for message handleing 
+            onQueryPress={() => {
+              setSelectedCourseForQuery(item);
+              setShowQueryModal(true);
+            }}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -194,19 +250,18 @@ const MyCourseScreen = () => {
         }
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            {searchQuery 
-              ? 'No courses match your search' 
-              : selectedTab === 'enrolled' 
-                ? 'No enrolled courses yet'
-                : 'No available courses found'
-            }
+            {searchQuery
+              ? 'No courses match your search'
+              : selectedTab === 'enrolled'
+              ? 'No enrolled courses yet'
+              : 'No available courses found'}
           </Text>
         }
       />
-
+ {/* Purchase Course Modal */}
       <Modal
         visible={showPurchaseModal}
-        transparent={true}
+        transparent
         animationType="fade"
         onRequestClose={() => setShowPurchaseModal(false)}
       >
@@ -219,25 +274,25 @@ const MyCourseScreen = () => {
             <Text style={styles.priceText}>
               Price: ₹{selectedCourse?.price}
             </Text>
-            
+
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowPurchaseModal(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[styles.modalButton, styles.subscribeButton]}
                 onPress={() => {
                   setShowPurchaseModal(false);
                   router.push({
                     pathname: '/(payment)/PaymentScreen',
-                    params: { 
-                      courseId: selectedCourse?._id,
-                      coursePrice: selectedCourse?.price.toString()
-                    }
+                    params: {
+                      courseId: selectedCourse?._id || '',
+                      coursePrice: selectedCourse?.price.toString() || '0',
+                    } as PaymentRouteParams,
                   });
                 }}
               >
@@ -247,79 +302,93 @@ const MyCourseScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/*  query message model*/}
+      <Modal
+      visible={showQueryModal}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowQueryModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Ask Question</Text>
+          <Text style={styles.courseName}>{selectedCourseForQuery?.title}</Text>
+          
+          <TextInput
+            style={styles.queryInput}
+            multiline
+            numberOfLines={4}
+            placeholder="Type your question here..."
+            value={queryText}
+            onChangeText={setQueryText}
+          />
+
+          <View style={styles.modalButtonContainer}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => setShowQueryModal(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalButton, styles.subscribeButton]}
+              onPress={handleQuerySubmit}
+              disabled={!queryText.trim()}
+            >
+              <Text style={styles.subscribeButtonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </View>
+    </Modal>
+
+      
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-    padding: 24
-  },
-  authContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20
-  },
-  authText: {
-    fontSize: 18,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#333'
-  },
-  authButton: {
-    backgroundColor: '#7F56D9',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8
-  },
-  authButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600'
+    padding: 24,
+    marginTop: 28
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
-  },
-  priceText: {
-    fontSize: 18,
-    fontFamily: 'Inter-Bold',
-    color: '#101828',
-    marginBottom: 24,
-    textAlign: 'center'
+    padding: 20,
   },
   errorText: {
     color: '#F04438',
     fontSize: 16,
-    fontFamily: 'Inter-Regular',
     marginBottom: 16,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   retryButton: {
     backgroundColor: '#7F56D9',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 8
+    borderRadius: 8,
   },
   retryButtonText: {
     color: '#FFFFFF',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14
+    fontSize: 14,
   },
   header: {
     fontSize: 24,
-    fontFamily: 'Inter-Bold',
+    fontWeight: '700',
     color: '#101828',
-    marginBottom: 16
+    marginBottom: 16,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -339,7 +408,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
     color: '#667085',
   },
   activeTabText: {
@@ -352,61 +421,87 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 32,
     color: '#98A2B3',
-    fontFamily: 'Inter-Regular',
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 24,
-    width: '80%',
+    width: '100%',
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 20,
-    fontFamily: 'Inter-Bold',
+    fontWeight: '700',
+    marginBottom: 8,
     color: '#101828',
-    marginBottom: 12,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   modalText: {
     fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#667085',
+    color: '#344054',
+    textAlign: 'center',
     marginBottom: 16,
-    textAlign: 'center'
+  },
+  priceText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#101828',
+    marginBottom: 24,
+    textAlign: 'center',
   },
   modalButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    width: '100%',
   },
   modalButton: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+    marginHorizontal: 8,
   },
   cancelButton: {
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#E4E7EC',
+  },
+  cancelButtonText: {
+    color: '#344054',
+    fontWeight: '600',
   },
   subscribeButton: {
     backgroundColor: '#7F56D9',
   },
-  cancelButtonText: {
-    color: '#344054',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14
-  },
   subscribeButtonText: {
-    color: 'white',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 14
-  }
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  // query message style 
+  queryInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 16,
+    textAlignVertical: 'top',
+    minHeight: 120,
+    fontSize: 14,
+    color: '#374151',
+  },
+  courseName: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+
 });
 
 export default MyCourseScreen;

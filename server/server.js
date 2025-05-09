@@ -33,7 +33,7 @@ app.use('/uploads', express.static(uploadsDir));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/queries', require('./routes/messageRoutes'));
 app.use('/api/payment', paymentRoutes);
 app.use('/api/courses', require('./routes/courseRoute')); 
 
