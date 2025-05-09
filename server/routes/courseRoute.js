@@ -19,7 +19,7 @@ const protect = require('../middleware/authMiddleware');
 router.post('/create',protect, createCourse);
 router.get('/', getCourses);
 router.get('/info', courseCount);
-router.get('/:id', getCourseById);
+router.get('/:id', protect,getCourseById);
 router.get('/user/enrolled', protect, getEnrolledCourses);
 router.post('/:id/enroll', protect, enrollCourse);
 router.post('/:id/lectures', protect, upload.single('video'), uploadLecture);
