@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View, Alert } from "react-native";
 import { WebView } from "react-native-webview";
 import axios, { AxiosError } from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { router, useLocalSearchParams } from "expo-router";
 import { AUTH_URL } from "@/constants/urls";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from "@tanstack/react-query";
 
 const PaymentScreen: React.FC = () => {
   const queryClient = useQueryClient();
@@ -86,7 +86,10 @@ const PaymentScreen: React.FC = () => {
         setCheckoutHtml(htmlContent);
       } catch (err) {
         const error = err as AxiosError;
-        console.error("❌ Failed to fetch order:", error.response?.data || error.message);
+        console.error(
+          "❌ Failed to fetch order:",
+          error.response?.data || error.message
+        );
         Alert.alert("Error", "Failed to initialize payment");
       } finally {
         setLoading(false);
@@ -118,13 +121,24 @@ const PaymentScreen: React.FC = () => {
       );
 
       if (verification.data.success) {
+        // await axios.post(
+        //     AUTH_URL.TRANSACTION_LOG,
+        //     {
+        //       userId: user._id,
+        //       courseId: courseIdStr,
+        //       amount: verification.data.amount || data.amount, // if you return it from backend
+        //       paymentId: response.razorpay_payment_id,
+        //     },
+        //     { headers: { Authorization: `Bearer ${token}` } }
+        //   );
+
         const updatedUser = {
           ...user,
           purchasedCourses: [...(user.purchasedCourses || []), courseIdStr],
         };
 
         await updateUser(updatedUser);
-        queryClient.invalidateQueries({ queryKey: ['courses'] }); // Invalidate courses query
+        queryClient.invalidateQueries({ queryKey: ["courses"] }); // Invalidate courses query
         Alert.alert("Success", "Course purchased successfully!");
 
         setTimeout(() => {

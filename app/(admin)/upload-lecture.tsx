@@ -7,31 +7,30 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  Modal,
+  Pressable,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import Toast from "react-native-toast-message";
 import API from "@/utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
-
 import { BackHandler } from "react-native";
 import { useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/Ionicons";
-
 import { store } from "../../redux/store";
 
 const UploadLectureScreen = () => {
   const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [video, setVideo] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const token = store.getState().auth.token;
   const currentUser = store.getState().auth.user;
-  console.log(currentUser);
 
   const router = useRouter();
 
@@ -42,16 +41,12 @@ const UploadLectureScreen = () => {
     };
 
     BackHandler.addEventListener("hardwareBackPress", onBackPress);
-
-    return () =>
-      BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
   });
-  useEffect(() => {
 
+  useEffect(() => {
     const fetchUserCourses = async () => {
       try {
-        //console.log("current user :" + currentUser._id)
-        console.log("this is upload lecture token :" + token);
         const res = await API.get(
           `/api/courses/my-courses/${currentUser._id}`,
           {
@@ -60,17 +55,9 @@ const UploadLectureScreen = () => {
             },
           }
         );
-        Toast.show({
-          type: "success",
-          text1: "Error",
-          text2: "Course fetched successfully",
-        });
         setCourses(res.data || []);
       } catch (err) {
-        console.log(
-          "Error fetching user courses:",
-          err.response?.data || err.message
-        );
+        console.log("Error fetching user courses:", err.response?.data || err.message);
         Toast.show({
           type: "error",
           text1: "Error",
@@ -82,7 +69,6 @@ const UploadLectureScreen = () => {
   }, [token]);
 
   const handlePickVideo = async () => {
-    console.log("User is this:  " + user);
     const result = await DocumentPicker.getDocumentAsync({
       type: "video/*",
       copyToCacheDirectory: true,
@@ -90,13 +76,11 @@ const UploadLectureScreen = () => {
 
     if (result.assets && result.assets.length > 0) {
       setVideo(result.assets[0]);
-    } else {
-      console.log("No file picked or operation cancelled.");
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedCourse || !title || !description || !video) {
+    if (!selectedCourse?._id || !title || !description || !video) {
       return Toast.show({
         type: "error",
         text1: "All fields required",
@@ -117,7 +101,7 @@ const UploadLectureScreen = () => {
       setUploading(true);
       setUploadProgress(0);
 
-      await API.post(`/api/courses/${selectedCourse}/lectures`, formData, {
+      await API.post(`/api/courses/${selectedCourse._id}/lectures`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -139,6 +123,7 @@ const UploadLectureScreen = () => {
       setTitle("");
       setDescription("");
       setVideo(null);
+      setSelectedCourse(null);
       setUploadProgress(0);
     } catch (err: any) {
       console.error("Upload error:", err);
@@ -154,28 +139,58 @@ const UploadLectureScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>
+      <View style={styles.headingContainer}>
         <TouchableOpacity
           onPress={() => router.replace("/(admin)/teacherDashboard")}
+          style={styles.backButton}
         >
           <Icon name="arrow-back" size={24} color="#4C51BF" />
         </TouchableOpacity>
-        Upload Lecture
-      </Text>
+        <Text style={styles.headingText}>Upload Lecture</Text>
+      </View>
 
       <Text style={styles.label}>Select Course</Text>
-      {courses.map((course: any) => (
-        <TouchableOpacity
-          key={course._id}
-          style={[
-            styles.courseItem,
-            selectedCourse === course._id && styles.selectedCourse,
-          ]}
-          onPress={() => setSelectedCourse(course._id)}
-        >
-          <Text>{course.title}</Text>
-        </TouchableOpacity>
-      ))}
+      <TouchableOpacity
+        style={styles.dropdownButton}
+        onPress={() => setDropdownVisible(true)}
+      >
+        <Text style={selectedCourse ? styles.dropdownButtonText : styles.dropdownButtonPlaceholder}>
+          {selectedCourse ? selectedCourse.title : "Select a course"}
+        </Text>
+        <Icon name="chevron-down" size={20} color="#718096" />
+      </TouchableOpacity>
+
+      <Modal
+        visible={dropdownVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDropdownVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setDropdownVisible(false)}>
+          <View style={styles.dropdownContainer}>
+            <ScrollView style={styles.dropdownScrollView}>
+              {courses.map((course: any) => (
+                <TouchableOpacity
+                  key={course._id}
+                  style={[
+                    styles.dropdownItem,
+                    selectedCourse?._id === course._id && styles.dropdownItemSelected,
+                  ]}
+                  onPress={() => {
+                    setSelectedCourse(course);
+                    setDropdownVisible(false);
+                  }}
+                >
+                  <Text style={styles.dropdownItemText}>{course.title}</Text>
+                  {selectedCourse?._id === course._id && (
+                    <Icon name="checkmark" size={20} color="#4C51BF" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
 
       <Text style={styles.label}>Lecture Title</Text>
       <TextInput
@@ -230,15 +245,22 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-    paddingTop: 48,
+    paddingTop: 16,
     backgroundColor: "#F8FAFC",
     flexGrow: 1,
   },
-  heading: {
+  headingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  backButton: {
+    marginRight: 12,
+  },
+  headingText: {
     fontSize: 26,
     fontWeight: "700",
     color: "#2D3748",
-    marginBottom: 32,
     letterSpacing: 0.3,
   },
   label: {
@@ -249,6 +271,63 @@ const styles = StyleSheet.create({
     color: "#2D3748",
     letterSpacing: 0.2,
   },
+  dropdownButton: {
+    backgroundColor: "white",
+    padding: 16,
+    borderRadius: 12,
+    borderColor: "#E2E8F0",
+    borderWidth: 1.5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  dropdownButtonText: {
+    color: "#2D3748",
+    fontSize: 15,
+  },
+  dropdownButtonPlaceholder: {
+    color: "#A0AEC0",
+    fontSize: 15,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  dropdownContainer: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    maxHeight: 300,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  dropdownScrollView: {
+    padding: 8,
+  },
+  dropdownItem: {
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EDF2F7",
+  },
+  dropdownItemSelected: {
+    backgroundColor: "#EBF8FF",
+  },
+  dropdownItemText: {
+    fontSize: 15,
+    color: "#2D3748",
+  },
   input: {
     backgroundColor: "white",
     padding: 16,
@@ -257,35 +336,11 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     fontSize: 15,
     color: "#2D3748",
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 1,
-  },
-  inputFocused: {
-    borderColor: "#4C51BF",
-  },
-  courseItem: {
-    backgroundColor: "white",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  selectedCourse: {
-    backgroundColor: "#EBF8FF",
-    borderColor: "#4C51BF",
-  },
-  courseItemText: {
-    fontSize: 15,
-    color: "#2D3748",
   },
   pickButton: {
     marginTop: 20,
@@ -295,7 +350,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1.5,
     borderColor: "#E2E8F0",
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
@@ -312,7 +367,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     marginTop: 32,
-    shadowColor: '#4C51BF',
+    shadowColor: "#4C51BF",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -348,19 +403,6 @@ const styles = StyleSheet.create({
     height: 8,
     backgroundColor: "#4C51BF",
     borderRadius: 4,
-  },
-  successMessage: {
-    marginTop: 24,
-    padding: 16,
-    backgroundColor: "#EBF8FF",
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#4C51BF",
-  },
-  successText: {
-    color: "#2D3748",
-    fontSize: 15,
-    fontWeight: "500",
   },
 });
 

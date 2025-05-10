@@ -1,49 +1,73 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { ScrollView } from 'react-native';
-import CourseCard from '@/components/CourseCard'; // or '../components/CourseCard' if not using alias
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AUTH_URL } from '@/constants/urls';
+import TransactionDetails from '../../components/TransactionDetails';
+import { Ionicons } from '@expo/vector-icons';
+
 
 export default function TransactionScreen() {
-    const router = useRouter();
-    
-    return (
-        <View style={styles.container}>
-            <Text style={styles.text}>💰 Transaction Screen</Text>
-            <ScrollView style={styles.scrollView}>
-                {/* First CourseCard - needs to match the Course interface */}
-                <CourseCard course={{
-                    _id: "1",
-                    title: "Master React Native",
-                    category: "Mobile Development",
-                    description: "Learn to build cross-platform mobile apps",
-                    progress: 75 // Note: should be number (0-100), not 0.75
-                }} />
-                
-                {/* Second CourseCard - this format doesn't match the component's props */}
-                {/* You'll need to modify it to match the expected interface */}
-                <CourseCard course={{
-                    _id: "2",
-                    title: "Advanced React Native",
-                    category: "Mobile Development",
-                    description: "Dive deeper into React Native concepts",
-                    thumbnail: "https://example.com/image.jpg"
-                }} />
-            </ScrollView>
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const { data } = await axios.get(AUTH_URL.TRANSACTION_LIST, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setTransactions(data.transactions);
+      } catch (error) {
+        Alert.alert("Error", "Could not load transactions");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, []);
+
+  return (
+    <View style={screenStyles.container}>
+      <Text style={screenStyles.header}>Payment History</Text>
+      
+      {loading ? (
+        <View style={screenStyles.loadingContainer}>
+          <Ionicons name="refresh-circle" size={24} color="#4C51BF" />
+          <Text style={screenStyles.loadingText}>Loading transactions...</Text>
         </View>
-    );
+      ) : (
+        <ScrollView>
+          {transactions.map((tx) => (
+            <TransactionDetails key={tx._id} transaction={tx} />
+          ))}
+        </ScrollView>
+      )}
+    </View>
+  );
 }
 
-const styles = StyleSheet.create({
-    container: { 
-        flex: 1, 
-        padding: 16 
-    },
-    text: { 
-        fontSize: 24, 
-        fontWeight: 'bold',
-        marginVertical: 16 
-    },
-    scrollView: {
-        width: '100%'
-    }
+const screenStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#F7FAFC',
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2D3748',
+    marginBottom: 24,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  loadingText: {
+    color: '#718096',
+  },
 });

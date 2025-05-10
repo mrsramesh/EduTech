@@ -12,7 +12,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import API from "@/utils/api";
-import { useAuth } from "@/app/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Lecture {
@@ -52,7 +52,8 @@ const CourseDetailsScreen = () => {
   useEffect(() => {
     const fetchTokenAndUser = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");        setStoretoken(token);
+        const token = await AsyncStorage.getItem("token");
+        setStoretoken(token);
         // console.log('User ID:', user?.id || 'Not available');
         // Removed: setToken(storedToken); because it's undefined
       } catch (error) {
@@ -71,8 +72,6 @@ const CourseDetailsScreen = () => {
     }
 
     try {
-      
-
       setLoading(true);
       setError(null);
 
