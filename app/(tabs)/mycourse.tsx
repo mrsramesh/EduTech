@@ -16,7 +16,7 @@ import { useFocusEffect } from "expo-router";
 import CourseCard from "@/components/CourseCard";
 import SearchInput from "@/components/SearchInput";
 import API from "@/utils/api";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useSelector } from "react-redux";
 import { selectCurrentToken, selectCurrentUser } from "@/redux/authSlice";
 import { router } from "expo-router";
