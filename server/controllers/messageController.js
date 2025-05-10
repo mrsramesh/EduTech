@@ -21,9 +21,10 @@ exports.queryMessage = async (req, res) => {
 
 exports.getQuery = async (req, res) => {
   try {
-    console.log("[inside query . get]");
-    
-    const queries = await Query.find()
+    console.log("inside get query")
+    const teacherId = req.params.teacherId; // Get teacher ID from route params
+    console.log(teacherId)
+    const queries = await Query.find({ teacher: teacherId })
       .populate('course student teacher');
 
     const filteredData = queries.map((item) => ({
@@ -32,7 +33,7 @@ exports.getQuery = async (req, res) => {
       message: item.message,
       courseId: item.course._id,
       courseTitle: item.course.title,
-      studentEmail:item.student.email
+      studentEmail: item.student.email
     }));
 
     res.status(200).json(filteredData);

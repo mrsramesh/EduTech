@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,17 +10,17 @@ import {
   Modal,
   TextInput,
   GestureResponderEvent,
-} from 'react-native';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useFocusEffect } from 'expo-router';
-import CourseCard from '@/components/CourseCard';
-import SearchInput from '@/components/SearchInput';
-import API from '@/utils/api';
-import { useAuth } from '../context/AuthContext';
-import { useSelector } from 'react-redux';
-import { selectCurrentToken, selectCurrentUser } from '@/redux/authSlice';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "react-native";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFocusEffect } from "expo-router";
+import CourseCard from "@/components/CourseCard";
+import SearchInput from "@/components/SearchInput";
+import API from "@/utils/api";
+import { useAuth } from "@/context/AuthContext";
+import { useSelector } from "react-redux";
+import { selectCurrentToken, selectCurrentUser } from "@/redux/authSlice";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Course {
   _id: string;
@@ -38,7 +38,7 @@ interface Course {
   };
 }
 
-type TabType = 'enrolled' | 'available';
+type TabType = "enrolled" | "available";
 
 type CourseRouteParams = {
   id: string;
@@ -56,34 +56,36 @@ const MyCourseScreen = () => {
   const reduxToken = useSelector(selectCurrentToken);
   const user = reduxUser || contextUser;
 
-  const [selectedTab, setSelectedTab] = useState<TabType>('enrolled');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTab, setSelectedTab] = useState<TabType>("enrolled");
+  const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [selectedCourseForQuery, setSelectedCourseForQuery] = useState<Course | null>(null);
+  const [selectedCourseForQuery, setSelectedCourseForQuery] =
+    useState<Course | null>(null);
   const [showQueryModal, setShowQueryModal] = useState(false);
-  const [queryText, setQueryText] = useState('');
+  const [queryText, setQueryText] = useState("");
 
-  const { 
-    data: courses, 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    data: courses,
+    isLoading,
+    error,
+    refetch,
   } = useQuery<Course[]>({
-    queryKey: ['courses', selectedTab, user?._id],
+    queryKey: ["courses", selectedTab, user?._id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) throw new Error('Authentication required');
-      
-      const endpoint = selectedTab === 'enrolled'
-        ? '/api/courses/user/enrolled'
-        : '/api/courses/user/available';
-        
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error("Authentication required");
+
+      const endpoint =
+        selectedTab === "enrolled"
+          ? "/api/courses/user/enrolled"
+          : "/api/courses/user/available";
+
       const res = await API.get(endpoint, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       return res.data;
@@ -98,9 +100,9 @@ const MyCourseScreen = () => {
   );
 
   const handleCoursePress = (course: Course) => {
-    if (selectedTab === 'enrolled') {
+    if (selectedTab === "enrolled") {
       router.push({
-        pathname: '/(course)/[id]',
+        pathname: "/(course)/[id]",
         params: { id: course._id } as CourseRouteParams,
       });
     } else {
@@ -111,32 +113,33 @@ const MyCourseScreen = () => {
 
   const handleQuerySubmit = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token || !selectedCourseForQuery || !queryText.trim() || !user?._id) return;
-      
+      const token = await AsyncStorage.getItem("token");
+      if (!token || !selectedCourseForQuery || !queryText.trim() || !user?._id)
+        return;
+
       const requestBody = {
         courseId: selectedCourseForQuery._id,
         message: queryText.trim(),
         studentId: user._id,
         teacherId: selectedCourseForQuery.createdBy._id,
-        courseTitle: selectedCourseForQuery.title
+        courseTitle: selectedCourseForQuery.title,
       };
-      
-      await API.post('/api/queries/send', requestBody, {
+
+      await API.post("/api/queries/send", requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
       });
-  
+
       setShowQueryModal(false);
-      setQueryText('');
-      alert('Query submitted successfully!');
+      setQueryText("");
+      alert("Query submitted successfully!");
     } catch (error) {
-      console.error('Query submission failed:', error);
-      alert('Failed to submit query. Please try again.');
+      console.error("Query submission failed:", error);
+      alert("Failed to submit query. Please try again.");
     }
-  }
+  };
 
   const handleRetryPress = (e: GestureResponderEvent) => {
     e.preventDefault();
@@ -156,7 +159,7 @@ const MyCourseScreen = () => {
     try {
       await refetch();
     } catch (err) {
-      console.error('Refresh failed:', err);
+      console.error("Refresh failed:", err);
     } finally {
       setRefreshing(false);
     }
@@ -176,10 +179,7 @@ const MyCourseScreen = () => {
         <Text style={styles.errorText}>
           Error loading courses: {error.message}
         </Text>
-        <TouchableOpacity 
-          style={styles.retryButton} 
-          onPress={handleRetryPress}
-        >
+        <TouchableOpacity style={styles.retryButton} onPress={handleRetryPress}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -198,19 +198,35 @@ const MyCourseScreen = () => {
 
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 'enrolled' && styles.activeTab]}
-          onPress={() => setSelectedTab('enrolled')}
+          style={[
+            styles.tabButton,
+            selectedTab === "enrolled" && styles.activeTab,
+          ]}
+          onPress={() => setSelectedTab("enrolled")}
         >
-          <Text style={[styles.tabText, selectedTab === 'enrolled' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "enrolled" && styles.activeTabText,
+            ]}
+          >
             Enrolled Courses
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 'available' && styles.activeTab]}
-          onPress={() => setSelectedTab('available')}
+          style={[
+            styles.tabButton,
+            selectedTab === "available" && styles.activeTab,
+          ]}
+          onPress={() => setSelectedTab("available")}
         >
-          <Text style={[styles.tabText, selectedTab === 'available' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "available" && styles.activeTabText,
+            ]}
+          >
             Available Courses
           </Text>
         </TouchableOpacity>
@@ -222,7 +238,7 @@ const MyCourseScreen = () => {
         renderItem={({ item }) => (
           <CourseCard
             course={item}
-            isLocked={selectedTab === 'available'}
+            isLocked={selectedTab === "available"}
             onPress={() => handleCoursePress(item)}
             onQueryPress={() => {
               setSelectedCourseForQuery(item);
@@ -235,17 +251,17 @@ const MyCourseScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#7F56D9']}
+            colors={["#7F56D9"]}
             tintColor="#7F56D9"
           />
         }
         ListEmptyComponent={
           <Text style={styles.emptyText}>
             {searchQuery
-              ? 'No courses match your search'
-              : selectedTab === 'enrolled'
-              ? 'No enrolled courses yet'
-              : 'No available courses found'}
+              ? "No courses match your search"
+              : selectedTab === "enrolled"
+              ? "No enrolled courses yet"
+              : "No available courses found"}
           </Text>
         }
       />
@@ -279,10 +295,10 @@ const MyCourseScreen = () => {
                 onPress={() => {
                   setShowPurchaseModal(false);
                   router.push({
-                    pathname: '/(payment)/PaymentScreen',
+                    pathname: "/(payment)/PaymentScreen",
                     params: {
-                      courseId: selectedCourse?._id || '',
-                      coursePrice: selectedCourse?.price.toString() || '0',
+                      courseId: selectedCourse?._id || "",
+                      coursePrice: selectedCourse?.price.toString() || "0",
                     } as PaymentRouteParams,
                   });
                 }}
@@ -303,8 +319,10 @@ const MyCourseScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Send Query</Text>
-            <Text style={styles.courseName}>{selectedCourseForQuery?.title}</Text>
-            
+            <Text style={styles.courseName}>
+              {selectedCourseForQuery?.title}
+            </Text>
+
             <TextInput
               style={styles.queryInput}
               multiline
@@ -340,47 +358,47 @@ const MyCourseScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: "#F8FAFC",
     padding: 24,
-    marginTop: 0
+    marginTop: 0,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   errorText: {
-    color: '#F04438',
+    color: "#F04438",
     fontSize: 16,
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   retryButton: {
-    backgroundColor: '#7F56D9',
+    backgroundColor: "#7F56D9",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
   },
   header: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#101828',
+    fontWeight: "700",
+    color: "#101828",
     marginBottom: 16,
   },
   tabContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 24,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: "#F2F4F7",
     borderRadius: 20,
     padding: 4,
   },
@@ -388,107 +406,106 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   activeTab: {
-    backgroundColor: '#7F56D9',
+    backgroundColor: "#7F56D9",
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#667085',
+    fontWeight: "600",
+    color: "#667085",
   },
   activeTabText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   listContent: {
     paddingBottom: 32,
   },
   emptyText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 32,
-    color: '#98A2B3',
+    color: "#98A2B3",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 24,
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 8,
-    color: '#101828',
-    textAlign: 'center',
+    color: "#101828",
+    textAlign: "center",
   },
   modalText: {
     fontSize: 16,
-    color: '#344054',
-    textAlign: 'center',
+    color: "#344054",
+    textAlign: "center",
     marginBottom: 16,
   },
   priceText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#101828',
+    fontWeight: "600",
+    color: "#101828",
     marginBottom: 24,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
   modalButton: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 8,
   },
   cancelButton: {
-    backgroundColor: '#E4E7EC',
+    backgroundColor: "#E4E7EC",
   },
   cancelButtonText: {
-    color: '#344054',
-    fontWeight: '600',
+    color: "#344054",
+    fontWeight: "600",
   },
   subscribeButton: {
-    backgroundColor: '#7F56D9',
+    backgroundColor: "#7F56D9",
   },
   subscribeButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
-  // query message style 
+  // query message style
   queryInput: {
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
     borderRadius: 8,
     padding: 16,
     marginVertical: 16,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     minHeight: 120,
     fontSize: 14,
-    color: '#374151',
+    color: "#374151",
   },
   courseName: {
     fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: "#6B7280",
+    textAlign: "center",
     marginBottom: 8,
   },
-
 });
 
 export default MyCourseScreen;

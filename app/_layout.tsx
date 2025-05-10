@@ -1,15 +1,15 @@
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Slot, Stack } from 'expo-router';
-import Toast from 'react-native-toast-message';
-import { StatusBar } from 'expo-status-bar';
-import { Provider, useDispatch } from 'react-redux';
-import { store } from '../redux/store';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './context/AuthContext';
-import { useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setCredentials } from '@/redux/authSlice';
-import { StyleSheet } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { Slot, Stack } from "expo-router";
+import Toast from "react-native-toast-message";
+import { StatusBar } from "expo-status-bar";
+import { Provider, useDispatch } from "react-redux";
+import { store } from "../redux/store";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "../context/AuthContext";
+import { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setCredentials } from "@/redux/authSlice";
+import { StyleSheet } from "react-native";
 
 const queryClient = new QueryClient();
 
@@ -18,8 +18,8 @@ function AppContent() {
 
   useEffect(() => {
     const restoreSession = async () => {
-      const token = await AsyncStorage.getItem('token');
-      const role = await AsyncStorage.getItem('role');
+      const token = await AsyncStorage.getItem("token");
+      const role = await AsyncStorage.getItem("role");
       if (token && role) {
         const user = { token, role };
         dispatch(setCredentials({ user, token }));
@@ -60,6 +60,6 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff', // optional: avoid black background bleed in notches
+    backgroundColor: "#fff", // optional: avoid black background bleed in notches
   },
 });
