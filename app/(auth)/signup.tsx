@@ -156,7 +156,7 @@ export default function SignUp() {
 
   return (
     <LinearGradient
-      colors={['#6C63FF', '#4A42E8']}
+      colors={["#7F56D9", "#9E77ED"]}
       style={styles.container}
     >
       <KeyboardAvoidingView
