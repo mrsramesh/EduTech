@@ -57,6 +57,14 @@ export default function DashboardLayout() {
             <Text style={styles.drawerLabel}>Students</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity 
+            style={styles.drawerItem}
+            onPress={() => props.navigation.navigate('inbox')}
+          >
+            <Ionicons name="mail" size={20} style={styles.drawerIcon} />
+            <Text style={styles.drawerLabel}>Inbox</Text>
+          </TouchableOpacity>
+
           {/* Logout Button */}
           <TouchableOpacity 
             style={[styles.drawerItem, { marginTop: 'auto', marginBottom: 20 }]}
@@ -102,6 +110,17 @@ export default function DashboardLayout() {
           )
         }} 
       />
+      <Drawer.Screen 
+        name="inbox" 
+        options={{ 
+          title: 'Inbox',
+          drawerLabel: 'Inbox',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="mail" color={color} size={size} />
+          )
+        }} 
+      />
+
     </Drawer>
   );
 }
