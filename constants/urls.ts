@@ -1,5 +1,5 @@
 
-const BASE_URL =   'http://192.168.1.17:5001/api'//'http://localhost:5000/api';
+const BASE_URL =   'http://192.168.1.5:5001/api'//'http://localhost:5000/api';
 
 
 
@@ -11,7 +11,8 @@ export const  AUTH_URL = {
   RESET_PASSWORD: `${BASE_URL}/auth/reset-password`,
   UPDATE_PROFILE: `${BASE_URL}/auth/update-profile`,
   PAYMENT:  `${BASE_URL}/payment/create-order`,
-  VERIFY_PAYMENT: `${BASE_URL}/payment/verify-payment`
+  VERIFY_PAYMENT: `${BASE_URL}/payment/verify-payment`,
+  TRANSACTION_LIST: `${BASE_URL}/payment/transaction`,
 };
 
 

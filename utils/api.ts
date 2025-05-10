@@ -1,7 +1,7 @@
 import axios from 'axios';
 const API = axios.create({
   //baseURL: 'http://localhost:5000', // for web 
-  baseURL: 'http://192.168.1.17:5001', // for mobile . 
+  baseURL: 'http://192.168.1.5:5001', // for mobile . 
 
 
   timeout: 2100000,
