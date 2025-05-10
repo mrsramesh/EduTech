@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View, Alert } from "react-native";
 import { WebView } from "react-native-webview";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useAuth } from "../context/AuthContext";
 import { router, useLocalSearchParams } from "expo-router";
 import { AUTH_URL } from "@/constants/urls";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQueryClient } from '@tanstack/react-query';
 
 const PaymentScreen: React.FC = () => {
+  const queryClient = useQueryClient();
   const { user: contextUser, updateUser, isLoading: authLoading } = useAuth();
   const reduxUser = useSelector((state: RootState) => state.auth.user);
   const { courseId } = useLocalSearchParams();
 
   const [checkoutHtml, setCheckoutHtml] = useState("");
   const [loading, setLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false); // prevent re-fetch
-  const [isPaymentVerified, setIsPaymentVerified] = useState(false); // prevent double execution
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isPaymentVerified, setIsPaymentVerified] = useState(false);
 
   const user = reduxUser || contextUser;
   const courseIdStr = Array.isArray(courseId) ? courseId[0] : courseId;
@@ -27,7 +29,7 @@ const PaymentScreen: React.FC = () => {
       if (!courseIdStr || !user || authLoading || isInitialized) return;
 
       console.log("🚀 Fetching payment order for course:", courseIdStr);
-      setIsInitialized(true); // avoid refetching
+      setIsInitialized(true);
 
       try {
         const token = await AsyncStorage.getItem("token");
@@ -83,7 +85,8 @@ const PaymentScreen: React.FC = () => {
 
         setCheckoutHtml(htmlContent);
       } catch (err) {
-        console.error("❌ Failed to fetch order:", err?.response?.data || err);
+        const error = err as AxiosError;
+        console.error("❌ Failed to fetch order:", error.response?.data || error.message);
         Alert.alert("Error", "Failed to initialize payment");
       } finally {
         setLoading(false);
@@ -94,7 +97,7 @@ const PaymentScreen: React.FC = () => {
   }, [courseIdStr, user, authLoading]);
 
   const handlePaymentResponse = async (event: any) => {
-    if (isPaymentVerified) return; // prevent double execution
+    if (isPaymentVerified) return;
     setIsPaymentVerified(true);
 
     try {
@@ -121,6 +124,7 @@ const PaymentScreen: React.FC = () => {
         };
 
         await updateUser(updatedUser);
+        queryClient.invalidateQueries({ queryKey: ['courses'] }); // Invalidate courses query
         Alert.alert("Success", "Course purchased successfully!");
 
         setTimeout(() => {
@@ -128,7 +132,7 @@ const PaymentScreen: React.FC = () => {
             pathname: "/(course)/[id]",
             params: { id: courseIdStr },
           });
-        }, 500); // delay to sync state
+        }, 500);
       } else {
         Alert.alert("Error", "Payment verification failed");
       }

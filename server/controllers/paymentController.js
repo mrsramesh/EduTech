@@ -156,3 +156,50 @@ exports.getPaymentHistory = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch payment history" });
   }
 };
+
+exports.getPaymentReceipt = async (req, res) => {
+  try {
+    const paymentId = req.params.paymentId;
+
+    const payment = await Payment.findById(paymentId)
+      .populate("user", "name email")
+      .populate("course", "title price teacherId");
+
+    // ✅ Now it's safe to log
+    console.log("Payment object:", payment);
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    let teacherInfo = null;
+    if (payment.course && payment.course.teacherId) {
+      const teacher = await User.findById(payment.course.teacherId).select("name email");
+      if (teacher) {
+        teacherInfo = {
+          id: teacher._id,
+          name: teacher.name,
+          email: teacher.email,
+        };
+      }
+    }
+
+    res.status(200).json({
+      transactionId: payment._id,
+      amount: payment.amount,
+      courseId: payment.course._id,
+      courseTitle: payment.course.title,
+      student: {
+        id: payment.user._id,
+        name: payment.user.name,
+        email: payment.user.email,
+      },
+      teacher: teacherInfo,
+      date: payment.createdAt,
+    });
+
+  } catch (error) {
+    console.error("Error getting payment receipt:", error);
+    res.status(500).json({ error: "Failed to fetch receipt" });
+  }
+};
