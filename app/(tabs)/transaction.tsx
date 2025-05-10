@@ -1,49 +1,58 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { ScrollView } from 'react-native';
-import CourseCard from '@/components/CourseCard'; // or '../components/CourseCard' if not using alias
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AUTH_URL } from '@/constants/urls';
+import TransactionDetails from '../../components/TransactionDetails';
+
 
 export default function TransactionScreen() {
-    const router = useRouter();
-    
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        console.log("Making transaction call");
+        const { data } = await axios.get(AUTH_URL.TRANSACTION_LIST, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Fetched transactions:", JSON.stringify(data.transactions, null, 2));
+        setTransactions(data.transactions);
+      } catch (error) {
+        console.error("Failed to load transactions", error);
+        Alert.alert("Error", "Could not load transactions");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  if (loading) {
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>💰 Transaction Screen</Text>
-            <ScrollView style={styles.scrollView}>
-                {/* First CourseCard - needs to match the Course interface */}
-                <CourseCard course={{
-                    _id: "1",
-                    title: "Master React Native",
-                    category: "Mobile Development",
-                    description: "Learn to build cross-platform mobile apps",
-                    progress: 75 // Note: should be number (0-100), not 0.75
-                }} />
-                
-                {/* Second CourseCard - this format doesn't match the component's props */}
-                {/* You'll need to modify it to match the expected interface */}
-                <CourseCard course={{
-                    _id: "2",
-                    title: "Advanced React Native",
-                    category: "Mobile Development",
-                    description: "Dive deeper into React Native concepts",
-                    thumbnail: "https://example.com/image.jpg"
-                }} />
-            </ScrollView>
-        </View>
+      <View style={styles.container}>
+        <Text style={styles.text}>Loading Transactions...</Text>
+      </View>
     );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>💰 Your Transactions</Text>
+      <ScrollView style={styles.scrollView}>
+        {transactions.map((tx) => (
+          <TransactionDetails key={tx._id} transaction={tx} />
+        ))}
+      </ScrollView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: { 
-        flex: 1, 
-        padding: 16 
-    },
-    text: { 
-        fontSize: 24, 
-        fontWeight: 'bold',
-        marginVertical: 16 
-    },
-    scrollView: {
-        width: '100%'
-    }
+  container: { flex: 1, padding: 16 },
+  text: { fontSize: 24, fontWeight: 'bold', marginVertical: 16 },
+  scrollView: { width: '100%' },
 });

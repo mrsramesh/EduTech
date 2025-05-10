@@ -118,6 +118,17 @@ const PaymentScreen: React.FC = () => {
       );
 
       if (verification.data.success) {
+        // await axios.post(
+        //     AUTH_URL.TRANSACTION_LOG,
+        //     {
+        //       userId: user._id,
+        //       courseId: courseIdStr,
+        //       amount: verification.data.amount || data.amount, // if you return it from backend
+        //       paymentId: response.razorpay_payment_id,
+        //     },
+        //     { headers: { Authorization: `Bearer ${token}` } }
+        //   );
+
         const updatedUser = {
           ...user,
           purchasedCourses: [...(user.purchasedCourses || []), courseIdStr],

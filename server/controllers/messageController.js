@@ -11,7 +11,7 @@ exports.queryMessage = async (req, res) => {
       teacher: teacherId,
       status: 'pending'
     });
-
+    
     await newQuery.save();
     res.status(201).json(newQuery);
   } catch (error) {

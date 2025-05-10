@@ -4,6 +4,7 @@ const Course = require("../models/Course");
 const User = require("../models/User");
 const Payment = require("../models/paymentModel");
 const mongoose = require("mongoose");
+const Transaction = require("../models/Transaction");
 
 require("dotenv").config();
 
@@ -125,6 +126,18 @@ exports.verifyPayment = async (req, res) => {
         return res.status(404).json({ error: "User or Course not found" });
       }
 
+      // ✅ Create transaction receipt
+      await Transaction.create([{
+        userId,
+        courseId,
+        courseTitle: course.title,
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        amount: course.price, // or retrieve from payment object
+        currency: "INR",
+        status: "paid"
+      }], { session });
+
       await session.commitTransaction();
       session.endSession();
 
@@ -203,3 +216,20 @@ exports.getPaymentReceipt = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch receipt" });
   }
 };
+
+
+
+// GET /api/transactions
+exports.getUserTransactions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const transactions = await Transaction.find({ userId }).populate('courseId').sort({ createdAt: -1 });
+    console.log("Transaction :", transactions);
+    res.status(200).json({ success: true, transactions });
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ success: false, message: "Could not fetch transactions" });
+  }
+};
+
