@@ -1,54 +1,41 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 type TransactionProps = {
   transaction: {
     _id: string;
-    courseTitle: string;
     amount: number;
-    currency: string;
-    paymentId: string;
-    orderId: string;
     status: string;
     createdAt: string;
     courseId: {
-      _id: string;
       title: string;
-      description: string;
       category: string;
-      thumbnail?: string;
     };
   };
 };
 
 const TransactionDetails: React.FC<TransactionProps> = ({ transaction }) => {
-  const { courseId, paymentId, orderId, amount, currency, status, createdAt } = transaction;
+  const { courseId, amount, status, createdAt } = transaction;
 
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
-        <Image
-          source={{
-            uri:
-              courseId.thumbnail?.trim() ||
-              'https://via.placeholder.com/150',
-          }}
-          style={styles.thumbnail}
-        />
-        <View style={styles.headerText}>
-          <Text style={styles.title}>{courseId.title}</Text>
+      <View style={styles.content}>
+        
+        <View style={styles.textContainer}>
+          <Text style={styles.title} numberOfLines={1}>{courseId.title}</Text>
           <Text style={styles.category}>{courseId.category}</Text>
+          <Text style={styles.date}>
+            {new Date(createdAt).toLocaleDateString('en-IN')}
+          </Text>
         </View>
-      </View>
 
-      <View style={styles.details}>
-        <Text style={styles.detailText}>💸 Amount: ₹{amount} {currency}</Text>
-        <Text style={styles.detailText}>🧾 Payment ID: {paymentId}</Text>
-        <Text style={styles.detailText}>📦 Order ID: {orderId}</Text>
-        <Text style={styles.detailText}>📅 Date: {new Date(createdAt).toLocaleString()}</Text>
-        <Text style={[styles.detailText, status === 'paid' ? styles.paid : styles.unpaid]}>
-          ✅ Status: {status.toUpperCase()}
-        </Text>
+        <View style={styles.amountContainer}>
+          <Text style={styles.amount}>₹{amount}</Text>
+          <Text style={[styles.status, status === 'success' && styles.success]}>
+            {status.toUpperCase()}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -57,51 +44,54 @@ const TransactionDetails: React.FC<TransactionProps> = ({ transaction }) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
-    elevation: 3,
-  },
-  header: {
-    flexDirection: 'row',
     marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
-  thumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 12,
-    backgroundColor: '#eee',
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  headerText: {
-    justifyContent: 'center',
+  textContainer: {
+    flex: 1,
+    marginLeft: 16,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
-  },
-  category: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  details: {
-    marginTop: 8,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#374151',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2D3748',
     marginBottom: 4,
   },
-  paid: {
-    color: 'green',
-    fontWeight: 'bold',
+  category: {
+    fontSize: 12,
+    color: '#718096',
+    marginBottom: 4,
   },
-  unpaid: {
-    color: 'red',
-    fontWeight: 'bold',
+  date: {
+    fontSize: 12,
+    color: '#A0AEC0',
+  },
+  amountContainer: {
+    alignItems: 'flex-end',
+  },
+  amount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2D3748',
+    marginBottom: 4,
+  },
+  status: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6CBB3C',
+  },
+  success: {
+    color: '#6CBB3C',
   },
 });
-
 export default TransactionDetails;
