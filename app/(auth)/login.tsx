@@ -190,7 +190,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     alignSelf: 'center',
-    marginBottom: 20,
   },
   title: {
     fontSize: 28,

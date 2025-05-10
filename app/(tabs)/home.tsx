@@ -14,9 +14,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import { colors } from '../../theme'; 
 
 // Components
-import SearchComponent from "@/components/common/SearchWithFilter";
 import CourseSection from "@/components/CourseSection";
 import API from "@/utils/api";
 import DiscountCard from "@/components/DiscountCard";
@@ -131,7 +131,6 @@ const HomeScreen = () => {
 
       {/* Content */}
       <View style={styles.content}>
-        {/* <SearchComponent /> */}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Special Offers</Text>

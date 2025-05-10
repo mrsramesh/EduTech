@@ -336,12 +336,13 @@ const MyCourseScreen = () => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
     padding: 24,
-    marginTop: 28
+    marginTop: 0
   },
   loadingContainer: {
     flex: 1,

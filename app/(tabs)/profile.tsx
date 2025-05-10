@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,19 +8,24 @@ import {
   SafeAreaView,
   Image,
   ActivityIndicator,
-  Dimensions
-} from 'react-native';
-import { Feather, MaterialIcons, AntDesign, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+  Dimensions,
+} from "react-native";
+import {
+  Feather,
+  MaterialIcons,
+  AntDesign,
+  Ionicons,
+} from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 import API from "@/utils/api";
-import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 interface User {
   _id: string;
@@ -40,32 +44,34 @@ const ProfileScreen = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  const reduxUser = useSelector((state: RootState) => state.auth.user as User | null);
+
+  const reduxUser = useSelector(
+    (state: RootState) => state.auth.user as User | null
+  );
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
+        const token = await AsyncStorage.getItem("token");
         if (!token) {
-          router.replace('/(auth)/login');
+          router.replace("/(auth)/login");
           return;
         }
 
         if (reduxUser && reduxUser._id) {
           setUser(reduxUser);
         } else {
-          const response = await API.get<ApiUserResponse>('/api/auth/me', {
+          const response = await API.get<ApiUserResponse>("/api/auth/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data.data);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error("Error fetching user data:", error);
         Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: 'Failed to load user data',
+          type: "error",
+          text1: "Error",
+          text2: "Failed to load user data",
         });
       } finally {
         setLoading(false);
@@ -91,53 +97,52 @@ const ProfileScreen = () => {
     );
   }
 
-  const userInitials = `${user.fname.charAt(0)}${user.lname.charAt(0)}`.toUpperCase();
+  const userInitials = `${user.fname.charAt(0)}${user.lname.charAt(
+    0
+  )}`.toUpperCase();
 
   const options = [
-    { title: 'Edit Profile', icon: 'edit', screen: 'editprofile' },
-    { title: 'Payment Methods', icon: 'credit-card', screen: 'PaymentScreen' },
-    { title: 'Notification Settings', icon: 'bell', screen: 'notifications' },
-    { title: 'Security', icon: 'lock', screen: 'security' },
-    { title: 'Language', icon: 'globe', screen: 'language' },
-    { title: 'Terms & Privacy', icon: 'file-text', screen: 'terms' },
-    { title: 'Invite Friends', icon: 'user-plus', screen: 'invite' },
-    { title: 'Log Out', icon: 'log-out', screen: 'login' },
+    { title: "Edit Profile", icon: "edit", screen: "editprofile" },
+    { title: "Payment Methods", icon: "credit-card", screen: "PaymentScreen" },
+    { title: "Notification Settings", icon: "bell", screen: "notifications" },
+    { title: "Security", icon: "lock", screen: "security" },
+    { title: "Language", icon: "globe", screen: "language" },
+    { title: "Terms & Privacy", icon: "file-text", screen: "terms" },
+    { title: "Invite Friends", icon: "user-plus", screen: "invite" },
+    { title: "Log Out", icon: "log-out", screen: "login" },
   ];
 
   return (
-    <LinearGradient
-      colors={['#F8FAFF', '#E6EEFF']}
-      style={styles.safeArea}
-    >
-      <ScrollView 
+    <LinearGradient colors={["#F8FAFF", "#E6EEFF"]} style={styles.safeArea}>
+      <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity 
-            onPress={() => router.back()} 
+          {/* <TouchableOpacity
+            onPress={() => router.back()}
             style={styles.backButton}
           >
             <AntDesign name="arrowleft" size={24} color="#4C51BF" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <Text style={styles.headerTitle}>My Profile</Text>
-          <TouchableOpacity style={styles.settingsButton}>
+          {/* <TouchableOpacity style={styles.settingsButton}>
             <Feather name="settings" size={22} color="#4C51BF" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Profile Card */}
         <BlurView intensity={25} tint="light" style={styles.profileCard}>
           <View style={styles.avatarContainer}>
             {user.profileImage ? (
-              <Image 
-                source={{ uri: user.profileImage }} 
-                style={styles.avatarImage} 
+              <Image
+                source={{ uri: user.profileImage }}
+                style={styles.avatarImage}
               />
             ) : (
               <LinearGradient
-                colors={['#667EEA', '#764BA2']}
+                colors={["#667EEA", "#764BA2"]}
                 style={styles.avatarPlaceholder}
               >
                 <Text style={styles.avatarText}>{userInitials}</Text>
@@ -147,10 +152,12 @@ const ProfileScreen = () => {
               <Feather name="edit-2" size={16} color="white" />
             </TouchableOpacity>
           </View>
-          
-          <Text style={styles.name}>{user.fname} {user.lname}</Text>
+
+          <Text style={styles.name}>
+            {user.fname} {user.lname}
+          </Text>
           <Text style={styles.email}>{user.email}</Text>
-          
+
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
               <Ionicons name="book" size={20} color="#4C51BF" />
@@ -172,7 +179,7 @@ const ProfileScreen = () => {
 
         {/* Premium Banner */}
         <LinearGradient
-          colors={['#FEF3C7', '#FDE68A']}
+          colors={["#FEF3C7", "#FDE68A"]}
           style={styles.premiumBanner}
         >
           <MaterialIcons name="workspace-premium" size={24} color="#D97706" />
@@ -192,27 +199,27 @@ const ProfileScreen = () => {
               <TouchableOpacity
                 style={styles.optionRow}
                 onPress={() => {
-                  if (screen === 'login') {
-                    router.replace('/(auth)/login');
-                  } else if (screen === 'PaymentScreen') {
-                    router.push('/(payment)/PaymentScreen');
+                  if (screen === "login") {
+                    router.replace("/(auth)/login");
+                  } else if (screen === "PaymentScreen") {
+                    router.push("/(payment)/PaymentScreen");
                   } else if (screen) {
                     router.push(`/(profile)/editprofile`);
                   }
                 }}
               >
                 <View style={styles.optionIconContainer}>
-                  <Feather 
-                    name={icon as keyof typeof Feather.glyphMap} 
-                    size={20} 
-                    color="#4C51BF" 
+                  <Feather
+                    name={icon as keyof typeof Feather.glyphMap}
+                    size={20}
+                    color="#4C51BF"
                   />
                 </View>
                 <Text style={styles.optionText}>{title}</Text>
-                <MaterialIcons 
-                  name="keyboard-arrow-right" 
-                  size={24} 
-                  color="#A0AEC0" 
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  color="#A0AEC0"
                 />
               </TouchableOpacity>
               {index < options.length - 1 && <View style={styles.divider} />}
@@ -238,49 +245,49 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 32,
   },
   backButton: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: 'rgba(76, 81, 191, 0.1)',
+    backgroundColor: "rgba(76, 81, 191, 0.1)",
   },
   settingsButton: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: 'rgba(76, 81, 191, 0.1)',
+    backgroundColor: "rgba(76, 81, 191, 0.1)",
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#2D3748',
-    fontFamily: 'Inter-Bold',
+    fontWeight: "700",
+    color: "#2D3748",
+    fontFamily: "Inter-Bold",
   },
   profileCard: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
     borderRadius: 28,
     padding: 28,
     marginBottom: 24,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    shadowColor: '#4C51BF',
+    borderColor: "rgba(255, 255, 255, 0.4)",
+    shadowColor: "#4C51BF",
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.1,
     shadowRadius: 24,
     elevation: 8,
   },
   avatarContainer: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 20,
   },
   avatarImage: {
@@ -288,35 +295,35 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 4,
-    borderColor: 'white',
+    borderColor: "white",
   },
   avatarPlaceholder: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 4,
-    borderColor: 'white',
+    borderColor: "white",
   },
   avatarText: {
     fontSize: 36,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   editIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: '#4C51BF',
+    backgroundColor: "#4C51BF",
     width: 36,
     height: 36,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: 'white',
-    shadowColor: '#000',
+    borderColor: "white",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -324,47 +331,47 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#2D3748',
+    fontWeight: "700",
+    color: "#2D3748",
     marginBottom: 4,
-    fontFamily: 'Inter-Bold',
+    fontFamily: "Inter-Bold",
   },
   email: {
     fontSize: 16,
-    color: '#718096',
+    color: "#718096",
     marginBottom: 24,
-    fontFamily: 'Inter-Regular',
+    fontFamily: "Inter-Regular",
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
     paddingHorizontal: 20,
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   statValue: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#2D3748',
+    fontWeight: "700",
+    color: "#2D3748",
     marginTop: 6,
-    fontFamily: 'Inter-Bold',
+    fontFamily: "Inter-Bold",
   },
   statLabel: {
     fontSize: 14,
-    color: '#718096',
+    color: "#718096",
     marginTop: 4,
-    fontFamily: 'Inter-Regular',
+    fontFamily: "Inter-Regular",
   },
   premiumBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderRadius: 16,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: 'rgba(214, 158, 46, 0.3)',
+    borderColor: "rgba(214, 158, 46, 0.3)",
   },
   premiumTextContainer: {
     flex: 1,
@@ -372,42 +379,42 @@ const styles = StyleSheet.create({
   },
   premiumTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#92400E',
-    fontFamily: 'Inter-SemiBold',
+    fontWeight: "600",
+    color: "#92400E",
+    fontFamily: "Inter-SemiBold",
   },
   premiumSubtitle: {
     fontSize: 14,
-    color: '#B45309',
+    color: "#B45309",
     marginTop: 2,
-    fontFamily: 'Inter-Regular',
+    fontFamily: "Inter-Regular",
   },
   upgradeButton: {
-    backgroundColor: '#D97706',
+    backgroundColor: "#D97706",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 12,
   },
   upgradeText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Inter-SemiBold',
+    fontWeight: "600",
+    fontFamily: "Inter-SemiBold",
   },
   optionsContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 24,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
     elevation: 3,
   },
   optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 18,
     paddingHorizontal: 20,
   },
@@ -415,28 +422,28 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: 'rgba(76, 81, 191, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(76, 81, 191, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 16,
   },
   optionText: {
     flex: 1,
     fontSize: 16,
-    color: '#2D3748',
-    fontFamily: 'Inter-Medium',
+    color: "#2D3748",
+    fontFamily: "Inter-Medium",
   },
   divider: {
     height: 1,
-    backgroundColor: '#EDF2F7',
+    backgroundColor: "#EDF2F7",
     marginLeft: 80,
   },
   versionText: {
-    textAlign: 'center',
-    color: '#A0AEC0',
+    textAlign: "center",
+    color: "#A0AEC0",
     fontSize: 14,
     marginTop: 8,
-    fontFamily: 'Inter-Regular',
+    fontFamily: "Inter-Regular",
   },
 });
 

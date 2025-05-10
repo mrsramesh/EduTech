@@ -22,7 +22,7 @@ const discounts: DiscountItem[] = [
     title: 'New Student Offer!',
     discount: '40% OFF',
     description: 'On first course enrollment',
-    colors: ['#7F56D9', '#9E77ED'],
+    colors: ['#DD2590', '#EC796B'],
     icon: 'school',
   },
   {
@@ -30,7 +30,7 @@ const discounts: DiscountItem[] = [
     title: 'Flash Sale!',
     discount: '30% OFF',
     description: 'Limited time offer',
-    colors: ['#DD2590', '#EC796B'],
+    colors: ['#7F56D9', '#9E77ED'],
     icon: 'flash-on',
   },
   {

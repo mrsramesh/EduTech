@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -39,6 +35,9 @@ type Course = {
   title: string;
   students: number;
   lectures: number;
+  thumbnail:string;
+  courseThumbnail:string;
+
 };
 
 type Stats = {
@@ -68,48 +67,58 @@ const TeacherDashboard = () => {
     return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [coursesRes, studentsRes] = await Promise.all([
-          API.get(`/api/courses/my-courses/${currentUser._id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          API.get('/api/auth/students', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+  // Update the useEffect hook
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const [coursesRes, studentsRes, earningsRes] = await Promise.all([
+        API.get(`/api/courses/my-courses/${currentUser._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        API.get('/api/auth/students', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        API.get('/api/courses/earnings/teacher', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
 
-        const fetchedCourses = coursesRes.data || [];
-        const fetchedStudents = studentsRes.data || [];
+      const fetchedCourses = coursesRes.data || [];
+      const fetchedStudents = studentsRes.data || [];
+      const earningsData = earningsRes.data?.data || {
+        totalEarnings: 0,
+        totalStudents: 0,
+        totalCourses: 0
+      };
 
-        setCourses(fetchedCourses);
-        setStudents(fetchedStudents);
+      setCourses(fetchedCourses);
+      setStudents(fetchedStudents);
 
-        setStats({
-          totalStudents: fetchedStudents.length || 0,
-          activeCourses: fetchedCourses.length || 0,
-          totalEarnings: 1250, // Static for now
-        });
+      setStats({
+        totalStudents: earningsData.totalStudents,
+        activeCourses: fetchedCourses.length,
+        totalEarnings: earningsData.totalEarnings,
+      });
 
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Dashboard data loaded',
-        });
-      } catch (error: any) {
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: error.response?.data?.message || 'Failed to load dashboard data',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Dashboard data loaded',
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error.response?.data?.message || 'Failed to load dashboard data',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
-  }, []);
+  fetchData();
+}, []);
+
 
   const renderStudentItem = ({ item }: { item: Student }) => (
     <View style={styles.studentCard}>
@@ -132,7 +141,6 @@ const TeacherDashboard = () => {
   <TouchableOpacity style={styles.courseCard}>
     <Image
       source={{ uri: item.thumbnail || 'https://via.placeholder.com/100' }}
-      style={styles.courseThumbnail}
     />
     <View style={styles.courseInfo}>
       <Text style={styles.courseTitle}>{item.title}</Text>
@@ -194,7 +202,7 @@ const TeacherDashboard = () => {
             <View style={[styles.statIcon, { backgroundColor: '#E53E3E' }]}>
               <MaterialIcons name="attach-money" size={20} color="white" />
             </View>
-            <Text style={styles.statValue}>${stats.totalEarnings}</Text>
+            <Text style={styles.statValue}>₹ {stats.totalEarnings}</Text>
             <Text style={styles.statLabel}>Earnings</Text>
           </View>
         </View>
@@ -246,23 +254,33 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#EDF2F7',
-    paddingTop: 50,
+    paddingTop: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    zIndex: 10,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
     color: '#2D3748',
     marginLeft: 16,
+    letterSpacing: 0.5,
   },
   container: {
     flex: 1,
+    paddingBottom: 24,
   },
   scrollContent: {
-    padding: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     paddingBottom: 32,
   },
   loadingContainer: {
@@ -275,114 +293,147 @@ const styles = StyleSheet.create({
     marginTop: 16,
     color: '#4C51BF',
     fontSize: 16,
+    fontWeight: '500',
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 28,
+    gap: 12,
   },
   statCard: {
-    width: '30%',
-    borderRadius: 12,
-    padding: 16,
+    flex: 1,
+    borderRadius: 16,
+    padding: 20,
     alignItems: 'center',
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
+    backgroundColor: 'rgba(76, 81, 191, 0.1)',
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: '#2D3748',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#718096',
-    marginTop: 4,
+    marginTop: 6,
+    textAlign: 'center',
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     color: '#2D3748',
-    marginBottom: 16,
+    marginBottom: 20,
+    marginTop: 8,
+    letterSpacing: 0.3,
   },
   actionsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 28,
+    gap: 12,
   },
   actionButton: {
-    width: '48%',
+    flex: 1,
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.5)',
   },
   actionIcon: {
-    marginBottom: 8,
+    marginBottom: 12,
   },
   actionText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
     color: '#2D3748',
+    textAlign: 'center',
   },
   studentCard: {
-    width: 120,
+    width: 140,
     marginRight: 16,
     alignItems: 'center',
-    padding: 8,
+    padding: 16,
     backgroundColor: 'white',
-    borderRadius: 12,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
     elevation: 2,
   },
   studentAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 8,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    marginBottom: 12,
   },
   avatarPlaceholder: {
-    backgroundColor: '#CBD5E0',
+    backgroundColor: '#4C51BF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '600',
   },
   studentName: {
     fontWeight: '600',
     color: '#2D3748',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 4,
   },
   studentEmail: {
     fontSize: 12,
     color: '#718096',
+    textAlign: 'center',
+    marginTop: 4,
   },
   listContent: {
-    paddingBottom: 16,
+    paddingBottom: 24,
+    paddingRight: 8,
   },
   courseCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.5)',
   },
   courseIcon: {
-    marginRight: 12,
+    marginRight: 16,
   },
   courseInfo: {
     flex: 1,
@@ -390,20 +441,24 @@ const styles = StyleSheet.create({
   courseTitle: {
     fontWeight: '600',
     color: '#2D3748',
+    fontSize: 16,
+    marginBottom: 6,
   },
   courseStats: {
     flexDirection: 'row',
-    marginTop: 4,
+    marginTop: 8,
+    flexWrap: 'wrap',
   },
   courseStat: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
+    marginBottom: 4,
   },
   courseStatText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#718096',
-    marginLeft: 4,
+    marginLeft: 6,
   },
 });
 

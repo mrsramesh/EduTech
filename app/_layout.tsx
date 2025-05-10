@@ -1,3 +1,4 @@
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Slot, Stack } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { StatusBar } from 'expo-status-bar';
@@ -8,6 +9,7 @@ import { AuthProvider } from './context/AuthContext';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setCredentials } from '@/redux/authSlice';
+import { StyleSheet } from 'react-native';
 
 const queryClient = new QueryClient();
 
@@ -29,15 +31,17 @@ function AppContent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(admin)" />
-          <Stack.Screen name="(home)" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        <SafeAreaView style={styles.safeArea}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(admin)" />
+            <Stack.Screen name="(home)" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
 
-        <Toast />
-        <StatusBar style="auto" />
+          <Toast />
+          <StatusBar style="auto" />
+        </SafeAreaView>
       </AuthProvider>
     </QueryClientProvider>
   );
@@ -46,7 +50,16 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <SafeAreaProvider>
+        <AppContent />
+      </SafeAreaProvider>
     </Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff', // optional: avoid black background bleed in notches
+  },
+});

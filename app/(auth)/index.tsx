@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { colors } from '../../theme'; 
 
 const { width, height } = Dimensions.get('window');
 
@@ -79,38 +80,6 @@ const TeleadApp = () => {
             </LinearGradient>
           </Animated.View>
 
-          {/* Featured Mentor Card */}
-          <Animated.View
-            style={[
-              styles.cardContainer,
-              {
-                opacity: fadeAnim,
-                transform: [
-                  { translateY: slideUpAnim }
-                ]
-              }
-            ]}
-          >
-            <Image
-              source={{
-                uri: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=800&q=80'
-              }}
-              style={styles.cardBackground}
-              resizeMode="cover"
-            />
-            <BlurView intensity={60} tint="dark" style={styles.cardOverlay}>
-              <View style={styles.cardContent}>
-                <TouchableOpacity style={styles.playButton}>
-                  <MaterialIcons name="play-arrow" size={32} color="white" />
-                </TouchableOpacity>
-                <View style={styles.cardTextContainer}>
-                  <Text style={styles.cardTitle}>Learn from Top Mentors</Text>
-                  <Text style={styles.cardSubtitle}>Start your journey today</Text>
-                </View>
-              </View>
-            </BlurView>
-          </Animated.View>
-
           {/* Branding */}
           <Animated.View
             style={[
@@ -132,111 +101,166 @@ const TeleadApp = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#000'
+    backgroundColor: colors.darkBackground
   },
   gradientBackground: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingBottom: 40,
+    backgroundColor: colors.darkBackground
   },
   contentContainer: {
     flex: 1,
     width: '100%',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 40
   },
   circleContainer: {
-    width: width * 0.6,
-    height: width * 0.6,
-    marginBottom: 40
+    width: width * 0.7,
+    height: width * 0.7,
+    marginBottom: 30,
+    position: 'relative'
   },
   circleGradient: {
     flex: 1,
-    borderRadius: width * 0.3,
+    borderRadius: width * 0.35,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.secondary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 30,
+    elevation: 20,
+    backgroundColor: colors.primary, // Added primary color base
+    borderWidth: 2,
+    borderColor: `rgba(${colors.secondary}, 0.2)`
+  },
+  logoInnerCircle: {
+    width: width * 0.6,
+    height: width * 0.6,
+    borderRadius: width * 0.3,
+    backgroundColor: `rgba(255,255,255,0.05)`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: `rgba(${colors.secondary}, 0.3)`,
+    overflow: 'hidden'
+  },
+  logoImage: {
+    width: '70%',
+    height: '70%',
+    resizeMode: 'contain',
+    tintColor: colors.white
+  },
+  cardContainer: {
+    width: width * 0.9,
+    height: width * 0.6,
+    borderRadius: 24,
+    overflow: 'hidden',
+    marginBottom: 30,
+    position: 'relative',
+    backgroundColor: colors.darkBackground,
+    borderWidth: 1,
+    borderColor: `rgba(255,255,255,0.15)`,
+    shadowColor: colors.darkBackground,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
-    elevation: 10
-  },
-  logoInnerCircle: {
-    width: width * 0.5,
-    height: width * 0.5,
-    borderRadius: width * 0.25,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.2)'
-  },
-  cardContainer: {
-    width: width * 0.85,
-    height: width * 0.5,
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 40,
-    position: 'relative',
-    backgroundColor: '#222'
+    elevation: 15
   },
   cardBackground: {
     width: '100%',
     height: '100%',
-    position: 'absolute'
+    position: 'absolute',
+    opacity: 0.8
   },
   cardOverlay: {
     flex: 1,
-    padding: 20,
+    padding: 24,
     justifyContent: 'flex-end',
-    borderRadius: 20
+    backgroundColor: `rgba(${colors.darkBackground}, 0.6)`,
+    borderRadius: 24
   },
   cardContent: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginBottom: 10
   },
   playButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FEBC00',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15
+    marginRight: 20,
+    shadowColor: colors.secondary,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 5
+  },
+  playIcon: {
+    marginLeft: 4,
+    tintColor: colors.darkBackground
   },
   cardTextContainer: {
     flex: 1
   },
   cardTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold'
+    color: colors.white,
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+    textShadowColor: `rgba(${colors.darkBackground}, 0.5)`,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3
   },
   cardSubtitle: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 14
+    color: `rgba(255,255,255,0.9)`,
+    fontSize: 16,
+    fontWeight: '500',
+    letterSpacing: 0.3
   },
   brandingContainer: {
     alignItems: 'center',
-    marginTop: 10
+    marginTop: 20
   },
   logoText: {
-    color: 'white',
-    fontSize: 38,
-    fontWeight: 'bold',
-    letterSpacing: 4
+    color: colors.white,
+    fontSize: 42,
+    fontWeight: '800',
+    letterSpacing: 5,
+    textShadowColor: `rgba(${colors.darkBackground}, 0.5)`,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3
   },
   tagline: {
-    color: 'rgba(255,255,255,0.7)',
+    color: `rgba(255,255,255,0.8)`,
+    fontSize: 16,
+    marginTop: 8,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    fontWeight: '500'
+  },
+  loadingContainer: {
+    marginTop: 40,
+    alignItems: 'center'
+  },
+  loadingText: {
+    color: colors.textSecondary,
     fontSize: 14,
-    marginTop: 5,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase'
+    marginTop: 12,
+    letterSpacing: 1
   }
 });
-
 export default TeleadApp;
