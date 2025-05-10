@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import API from '@/utils/api';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useNavigation, useFocusEffect } from 'expo-router';
@@ -31,13 +31,15 @@ type Student = {
 };
 
 type Course = {
-  id: string;
+  _id: string;
   title: string;
-  students: number;
-  lectures: number;
-  thumbnail:string;
-  courseThumbnail:string;
-
+  description: string;
+  students: any[];
+  lectures: any[];
+  thumbnail: string;
+  price: number;
+  rating: number;
+  category: string;
 };
 
 type Stats = {
@@ -60,6 +62,8 @@ const TeacherDashboard = () => {
     activeCourses: 0,
     totalEarnings: 0,
   });
+  const [coursesToShow, setCoursesToShow] = useState<number>(3);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   useFocusEffect(() => {
     const onBackPress = () => true;
@@ -67,63 +71,73 @@ const TeacherDashboard = () => {
     return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
   });
 
-  // Update the useEffect hook
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const [coursesRes, studentsRes, earningsRes] = await Promise.all([
-        API.get(`/api/courses/my-courses/${currentUser._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        API.get('/api/auth/students', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        API.get('/api/courses/earnings/teacher', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [coursesRes, studentsRes, earningsRes] = await Promise.all([
+          API.get(`/api/courses/my-courses/${currentUser._id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          API.get('/api/auth/students', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          API.get('/api/courses/earnings/teacher', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-      const fetchedCourses = coursesRes.data || [];
-      const fetchedStudents = studentsRes.data || [];
-      const earningsData = earningsRes.data?.data || {
-        totalEarnings: 0,
-        totalStudents: 0,
-        totalCourses: 0
-      };
+        const fetchedCourses = coursesRes.data || [];
+        const fetchedStudents = studentsRes.data || [];
+        const earningsData = earningsRes.data?.data || {
+          totalEarnings: 0,
+          totalStudents: 0,
+          totalCourses: 0
+        };
 
-      setCourses(fetchedCourses);
-      setStudents(fetchedStudents);
+        setCourses(fetchedCourses);
+        setStudents(fetchedStudents);
 
-      setStats({
-        totalStudents: earningsData.totalStudents,
-        activeCourses: fetchedCourses.length,
-        totalEarnings: earningsData.totalEarnings,
-      });
+        setStats({
+          totalStudents: earningsData.totalStudents,
+          activeCourses: fetchedCourses.length,
+          totalEarnings: earningsData.totalEarnings,
+        });
 
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Dashboard data loaded',
-      });
-    } catch (error: any) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: error.response?.data?.message || 'Failed to load dashboard data',
-      });
-    } finally {
-      setLoading(false);
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Dashboard data loaded',
+        });
+      } catch (error: any) {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: error.response?.data?.message || 'Failed to load dashboard data',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const toggleCourses = () => {
+    if (expanded) {
+      setCoursesToShow(3);
+    } else {
+      setCoursesToShow(courses.length);
     }
+    setExpanded(!expanded);
   };
-
-  fetchData();
-}, []);
-
 
   const renderStudentItem = ({ item }: { item: Student }) => (
     <View style={styles.studentCard}>
       {item.profileImage ? (
-        <Image source={{ uri: item.profileImage }} style={styles.studentAvatar} />
+        <Image 
+          source={{ uri: item.profileImage }} 
+          style={styles.studentAvatar} 
+        />
       ) : (
         <View style={[styles.studentAvatar, styles.avatarPlaceholder]}>
           <Text style={styles.avatarText}>
@@ -138,27 +152,45 @@ useEffect(() => {
   );
 
   const renderCourseItem = ({ item }: { item: Course }) => (
-  <TouchableOpacity style={styles.courseCard}>
-    <Image
-      source={{ uri: item.thumbnail || 'https://via.placeholder.com/100' }}
-    />
-    <View style={styles.courseInfo}>
-      <Text style={styles.courseTitle}>{item.title}</Text>
-      <View style={styles.courseStats}>
-        <View style={styles.courseStat}>
-          <Ionicons name="people" size={16} color="#718096" />
-          <Text style={styles.courseStatText}>{item.students?.length || 0} students</Text>
+    <TouchableOpacity 
+      style={styles.courseCard}
+      // onPress={() => router.push(`/(admin)/courses/${item._id}`)}
+    >
+      <Image
+        source={{ uri: item.thumbnail || 'https://via.placeholder.com/300x200' }}
+        style={styles.courseThumbnail}
+      />
+      <View style={styles.courseContent}>
+        <View style={styles.courseHeader}>
+          <Text style={styles.courseCategory}>{item.category || 'General'}</Text>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={16} color="#F59E0B" />
+            <Text style={styles.ratingText}>{item.rating || '4.5'}</Text>
+          </View>
         </View>
-        <View style={styles.courseStat}>
-          <Ionicons name="videocam" size={16} color="#718096" />
-          <Text style={styles.courseStatText}>{item.lectures?.length || 0} lectures</Text>
+        
+        <Text style={styles.courseTitle}>{item.title}</Text>
+        <Text style={styles.courseDescription} numberOfLines={2}>
+          {item.description || 'No description available'}
+        </Text>
+        
+        <View style={styles.courseFooter}>
+          <View style={styles.courseMeta}>
+            <View style={styles.metaItem}>
+              <Ionicons name="people" size={16} color="#718096" />
+              <Text style={styles.metaText}>{item.students?.length || 0} Students</Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="videocam" size={16} color="#718096" />
+              <Text style={styles.metaText}>{item.lectures?.length || 0} Lectures</Text>
+            </View>
+          </View>
+          
+          <Text style={styles.coursePrice}>₹{item.price || 0}</Text>
         </View>
       </View>
-    </View>
-    <Ionicons name="chevron-forward" size={20} color="#A0AEC0" />
-  </TouchableOpacity>
-);
-
+    </TouchableOpacity>
+  );
 
   if (loading) {
     return (
@@ -234,12 +266,28 @@ useEffect(() => {
           showsHorizontalScrollIndicator={false}
         />
 
-        <Text style={styles.sectionTitle}>Your Courses</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Your Courses</Text>
+          {courses.length > 3 && (
+            <TouchableOpacity onPress={toggleCourses} style={styles.showMoreButton}>
+              <Text style={styles.showMoreText}>
+                {expanded ? 'Show Less' : 'Show All'}
+              </Text>
+              <Feather 
+                name={expanded ? 'chevron-up' : 'chevron-down'} 
+                size={20} 
+                color="#4C51BF" 
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+        
         <FlatList
-          data={courses}
+          data={courses.slice(0, coursesToShow)}
           renderItem={renderCourseItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           scrollEnabled={false}
+          contentContainerStyle={styles.coursesList}
         />
       </ScrollView>
     </View>
@@ -333,13 +381,27 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#2D3748',
-    marginBottom: 20,
-    marginTop: 8,
     letterSpacing: 0.3,
+  },
+  showMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+  },
+  showMoreText: {
+    color: '#4C51BF',
+    fontWeight: '600',
+    marginRight: 4,
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -417,12 +479,12 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     paddingRight: 8,
   },
+  coursesList: {
+    paddingBottom: 16,
+  },
   courseCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: 'white',
     borderRadius: 16,
-    padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -431,34 +493,72 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 1,
     borderColor: 'rgba(226, 232, 240, 0.5)',
+    overflow: 'hidden',
   },
-  courseIcon: {
-    marginRight: 16,
+  courseThumbnail: {
+    width: '100%',
+    height: 16,
   },
-  courseInfo: {
-    flex: 1,
+  courseContent: {
+    padding: 16,
   },
-  courseTitle: {
-    fontWeight: '600',
-    color: '#2D3748',
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  courseStats: {
+  courseHeader: {
     flexDirection: 'row',
-    marginTop: 8,
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-  courseStat: {
+  courseCategory: {
+    backgroundColor: '#E9D8FD',
+    color: '#6B46C1',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
-    marginBottom: 4,
   },
-  courseStatText: {
+  ratingText: {
+    marginLeft: 4,
+    color: '#F59E0B',
+    fontWeight: '600',
+  },
+  courseTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#2D3748',
+    marginBottom: 8,
+  },
+  courseDescription: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  courseFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  courseMeta: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metaText: {
     fontSize: 13,
     color: '#718096',
     marginLeft: 6,
+  },
+  coursePrice: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#4C51BF',
   },
 });
 

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {useRouter} from 'expo-router';
 import { store } from '../../redux/store';
 import { CurrentRenderContext } from '@react-navigation/native';
+
 export default function DashboardLayout() {
   const router = useRouter();
   const currentUser = store.getState().auth.user;
@@ -35,7 +36,9 @@ export default function DashboardLayout() {
           {/* Drawer Items */}
           <TouchableOpacity 
             style={styles.drawerItem}
-            onPress={() => props.navigation.navigate('home')}
+            onPress={() => {
+              router.replace('/(admin)/teacherDashboard'); 
+           }}
           >
             <Ionicons name="home" size={20} style={styles.drawerIcon} />
             <Text style={styles.drawerLabel}>Dashboard</Text>
@@ -51,7 +54,9 @@ export default function DashboardLayout() {
 
           <TouchableOpacity 
             style={styles.drawerItem}
-            onPress={() => props.navigation.navigate('students')}
+            onPress={() => {
+              router.replace('/(admin)/teacherDashboard'); 
+           }}
           >
             <Ionicons name="people" size={20} style={styles.drawerIcon} />
             <Text style={styles.drawerLabel}>Students</Text>
