@@ -19,4 +19,3 @@ exports.getTeachers = asyncHandler(async (req, res) => {
   }
 });
 
-// yi api work kar rahi hai teachers data find karne me db se . 
