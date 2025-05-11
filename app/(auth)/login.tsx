@@ -83,7 +83,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <LinearGradient
-        colors={['#6C63FF', '#4A42E8']}
+       colors={["#7F56D9", "#9E77ED"]}
         style={styles.container}
       >
         <ScrollView 
@@ -167,6 +167,7 @@ export default function LoginScreen() {
           </Animated.View>
         </ScrollView>
       </LinearGradient>
+
     </SafeAreaView>
   );
 }

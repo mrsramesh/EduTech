@@ -50,7 +50,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <LinearGradient colors={['#6C63FF', '#4A42E8']} style={styles.container}>
+    <LinearGradient colors={["#7F56D9", "#9E77ED"]} style={styles.container}>
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <Image source={require('@/assets/images/icon.png')} style={styles.logo} />
         <Text style={styles.title}>Forgot Password</Text>
